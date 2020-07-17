@@ -19,7 +19,7 @@ import java.util.Optional;
  * Azure Functions with HTTP Trigger.
  */
 public class ApacheFOPFunction {
-    private final SimpleDateFormat dateFormatW3C = new SimpleDateFormat("YYYY-MM-DD'T'hh:mm:ss");
+    private final SimpleDateFormat dateFormatW3C = new SimpleDateFormat("YYYY-MM-dd'T'hh:mm:ss");
 
     /**
      * This function listens at endpoint "/api/apache-fop/xslfo". Two ways to invoke it using "curl" command in bash:

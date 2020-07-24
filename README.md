@@ -6,9 +6,19 @@ You should be able to pull this code down, open with IntelliJ (after installing 
 ### Technical Summary:
 This project provides a REST API that recieves a POST body containing a well formed Xsl-FO Xml document ([like these Apache FOP samples](https://github.com/apache/xmlgraphics-fop/tree/trunk/fop/examples/fo/basic)). The service will respond with the rendered Pdf binary (file bytes).
 
-**Azure Function API Path:** `/api/apache-fop/xslfo`
+If an error occurs -- likely due to incorrect Xsl-FO syntax or structure -- then an Http 500 Response will be returned with a JSON payload containing details about the error.  For issues with the Xsl-FO parsing/processing, ApacheFOP generally provides very helpful info. about the line, location, and markup that caused the error so that it can be resolved.
 
-**Postman Example:**
+#### Azure Function API:
+ - Path: **`/api/apache-fop/xslfo`**
+ - Request Type: **POST**
+ - Request Body: **Xsl-FO Content as valid Xml** to Render
+
+#### Responses:
+ - **Http 200-OK**: *Binary File paylaod containing teh rendered Pdf File*
+ - **Http 500-InternalServerError** -- *Json response payload with ApacheFOP processing error details.*
+
+
+#### Postman Example:
 <p align="center">
 <img src="/postman-test-fonts-fo.png" style="width:auto;height:auto;max-width:1200px;">
 </p>

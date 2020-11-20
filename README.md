@@ -14,7 +14,7 @@ If an error occurs -- likely due to incorrect Xsl-FO syntax or structure -- then
  - Request Body: **Xsl-FO Content as valid Xml** to Render
 
 #### Responses:
- - **Http 200-OK**: *Binary File paylaod containing teh rendered Pdf File*
+ - **Http 200-OK**: *Binary File paylaod containing the rendered Pdf File*
  - **Http 500-InternalServerError** -- *Json response payload with ApacheFOP processing error details.*
 
 
@@ -24,28 +24,31 @@ If an error occurs -- likely due to incorrect Xsl-FO syntax or structure -- then
 </p>
 
 ## Project Overview:
-Generating high quality printable PDF outputs from a highly flexibly [pdf templating approach (separating content/data from presentation)](https://github.com/cajuncoding/PdfTemplating.XslFO) hasn't been easy in the world of .Net -- vs the world of Java where ApacheFOP has been around for a very long time.
+Generating high quality printable PDF outputs from a highly flexible [pdf templating approach (separating content/data from presentation)](https://github.com/cajuncoding/PdfTemplating.XslFO) hasn't been easy in the world of .Net -- vs the world of Java where ApacheFOP has been around for a very long time.
 
-Xsl-FO is still one of the best ways to maintain strong software development practices by rendering PDF (as a presentation output) from separate content/data + template.  And Xsl-FO offers features that some approaches just can't do (looking at you *Crystal Reports*). 
+For a more exhaustive dive into why PDF templating and markup based solutions are more powerful than report designer based solutions -- in today's modern web apps -- 
+I ramble on about that over here in [Part 1: Considerations for a robust PDF or Web reporting solution?](https://cajuncoding.com/2020-11-17-pdf-reports-part1-how-hard-can-it-be/) and [Part 2: Why markup based PDF Templating is the way to go...](https://cajuncoding.com/2020-11-18-pdf-reports-part2-ok-where-does-that-leave-us/).
 
-There has been a fully managed .Net C# port of [ApacheFOP](https://xmlgraphics.apache.org/fop/) based on a pre-v1.0 version (*is my guesstimate*).  But ApacheFOP is now on [v2.5 as of May 2020!](https://xmlgraphics.apache.org/fop/2.5/changes_2.5.html)
+Suffice it to say that markup based solutions have alot of value, and Xsl-FO is still one of the best ways to maintain strong software development practices by rendering PDF outputs (as a presentation output) from separated content/data + template. And Xsl-FO offers features that some approaches just can't do (looking at you *Crystal Reports*).
 
-So my goal has been, for a while, to take advantage of the many great innovations in the past several years to provide an interoperable integration between Java ApacheFOP and .Net, without resorting to [something that makes my eyes cross (ugg).](http://codemesh.com/products/juggernet/).
+There has been a fully managed .Net C# port of [Apache FOP](https://xmlgraphics.apache.org/fop/) (FO.Net) based on a pre-v1.0 version (*is my guesstimate*); it's old & unsupported, but still fairly functional, and I've used it very successfully on several projects. But Apache FOP is now on [v2.5 as of May 2020!](https://xmlgraphics.apache.org/fop/2.5/changes_2.5.html) with annual/bi-annual support updates still being released.
+
+So my goal has been, for a while, to take advantage of the many great innovations in the past several years to provide an interoperable integration between Java Apache FOP and .Net, without resorting to [something that makes my eyes cross (ugg).](http://codemesh.com/products/juggernet/).
 
 Taking advantage of some awesome new innovations (in Azure) we can do this in a much cleaner way using:
- - **[C# .Net for Templating](https://github.com/cajuncoding/PdfTemplating.XslFO)** *(anything other than native Java will benefit from this)*
+ - **[C# .Net for Templating using Razor](https://github.com/cajuncoding/PdfTemplating.XslFO)** *(anything other than native Java will benefit from this)*
  - **Microservice** for integration architecture
  - **REST API** for interoperability
  - **Azure Function** for native Java Support
- - **[ApacheFOP](https://xmlgraphics.apache.org/fop/)** for the free & robust XslFO processing implementation
+ - **[Apache FOP](https://xmlgraphics.apache.org/fop/)** for the free & robust XSL-FO processing implementation
 
-So that's the goal of this project, to provide a ready-to-deploy microservice implementation of ApacheFOP via Azure Functions. And enable others to pull the code down, deploy to their Azure subscription/resource group and be up and running in minutes -- especially those less experienced in Java.
+So that's the goal of this project, to provide a ready-to-deploy microservice implementation of Apache FOP via Azure Functions. And enable others to pull the code down, deploy to their Azure subscription/resource group and be up and running in minutes -- especially those less experienced in Java.
 
-I'm definitely not the only person to think of this, and definitely got a jumpstart from [this helpful article written by Marc Mathijssen.](https://medium.com/@marcmathijssen/using-the-power-of-apache-fop-in-a-net-world-using-azure-functions-971669b888dc)...
+I'm definitely not the only person to think of this, and definitely gleaned some insight from [this article written by Marc Mathijssen.](https://medium.com/@marcmathijssen/using-the-power-of-apache-fop-in-a-net-world-using-azure-functions-971669b888dc)...
 
 But, I did find that article left alot of nebulous details unclear, and would expect that a Java novice may really struggle to get it up and running. Especially the dependency on the command line tutorial, and lack of guidance on Java IDE, or how to Debug/Test, etc.
 
-And ultimately, it didn't provide any insight on how to configure Maven correctly *(I can hear some devs asking "what's Maven" right now)* or any code. So, **Kudos** for the intro, but I hope this helps to bring it across the goal line!
+And ultimately, it didn't provide any insight on how to configure Maven correctly *(I can hear some devs asking "what's Maven" right now)* or any code at all really. So, **Kudos** for the intro, but I hope this helps to bring it across the goal line!
 
 ## Getting Started:
 Here's the high level steps to get started...
@@ -65,7 +68,7 @@ Here's the high level steps to get started...
 ## Additional Features:
 
 #### GZIP Compression:
-In addition to rendering the PDF, this service already implements GZIP compression for returning the Binary PDF files.  This can greatly improve performance and download times, especially for PDFs rendered without much imagery, as the text content bytes tends to be more compressible.
+In addition to rendering the PDF, this service already implements GZIP compression for returning the Binary PDF files. This can greatly improve performance and download times, especially for PDFs rendered without much imagery, as the text content bytes tends to be more compressible.
 
 All you need to do is add the `Accept-Encoding` header with a value of `gzip` to the request:
 ```
@@ -78,9 +81,9 @@ Accept-Encoding=gzip
 ## Calling the Service from .Net
 
 ### Snippet:
-Because I talked about follow-trough up above, I'd be amiss if I didn't provide a sample implementation of calling this code from .Net.
+Because I talked about follow-through up above, I'd be amiss if I didn't provide a sample implementation of calling this code from .Net.
 
-Assuming the use of the great *RESTSharp library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml).
+Assuming the use of the great *RESTSharp library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml)... this sample should get you started on the .Net side as a client calleing the new PDF microservice.
 
 *NOTE: Just use RESTSharp and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
 
@@ -127,9 +130,9 @@ namespace PdfTemplating.XslFO.ApacheFOP.Serverless
 ### .Net PdfTemplating (Full blown) Implementation:
 A full blown implementation of templating + ApacheFOP.Serverless is in a branch of my [Pdf Templating project here](https://github.com/cajuncoding/PdfTemplating.XslFO/tree/feature/iniial_support_for_apache_fop_serverless_rendering).
 
-It illustrates the use of both Xslt & Razor templates from ASP.Net MVC to render PDF Binary reports dynamically from queries to the [Open Movie Database API](http://www.omdbapi.com/).  And has been enhanced to also now illustrate the use of ApacehFOP.Serverless micro-service for rendering instead of the embedded legacy FO.Net implementation.
+It illustrates the use of both Xslt and/or Razor templates from ASP.Net MVC to render PDF Binary reports dynamically from queries to the [Open Movie Database API](http://www.omdbapi.com/). And it has now been enhanced to also illustrate the use of _ApacehFOP.Serverless_ microservice for rendering instead of the embedded legacy FO.Net implementation.
 
-The following page url's will render the dynamic Pdf using ApacheFOP.Serverless.
+With the running application provided in the project above, the following page url's will render the dynamic Pdf using ApacheFOP.Serverless.
  
  *NOTE: You will need to have ApacheFOP.Serverless project running either locally or in your own instance of Azure :-) Just update the Web.config to point to your Host (Local or Azure).*
 
@@ -142,16 +145,17 @@ The following page url's will render the dynamic Pdf using ApacheFOP.Serverless.
 
 
 ## Additional Background:
-For many-many years, I've implemented Pdf Report generation in using [Templating approaches](https://github.com/cajuncoding/PdfTemplating.XslFO) for various clients (enterprises & small businesses) to help them automate their paper processes with dynamic generation of printable outputs such as: Pdf files, invoices, shipping/packaging labels, newletters, etc.
+For many-many years, I've implemented Pdf Reporting solutions with [templating approaches](https://github.com/cajuncoding/PdfTemplating.XslFO) for various clients (enterprises & small businesses) to help them automate their paper processes with dynamic generation of _printable media_ outputs such as: PDF files, invoices, shipping/packaging labels, newletters, etc.
 
-And, for a long while now I've known that the current C# implementation FO.Net was severly limited by the fact that it was created circa 2008 and is now [an archived CodePlex project](https://archive.codeplex.com/?p=fonet).
+And, for a long while now I've known that the current C# implementation FO.Net was limited by the fact that it was created circa 2008 and is now [an archived CodePlex project](https://archive.codeplex.com/?p=fonet).
 
-At one client the technology stack was fully Java based, so the use of ApacheFOP was a no-brainer; [ApacheFOP](https://xmlgraphics.apache.org/fop/) is a supported, open-source, full implementation of XslFO in Java, that has had regular updates/enhancements over the years. 
+At one client the technology stack was fully Java based, so the use of _Apache FOP_ was a no-brainer; [ApacheFOP](https://xmlgraphics.apache.org/fop/) is a supported, open-source, full implementation of an XSL-FO processor in Java, that has had regular updates/enhancements over the years. 
 
-The [FO.Net](https://archive.codeplex.com/?p=fonet) C# variant was ported from Apache FOP likely from a pre-v1.0
-version of ApacheFOP, but to be honest it has worked incredibly well, and reliably. As a fully managed C# solution, it ran in web projects as well a WinForms projects where viewing the rendered PDF live int he app real-time provided and wonderful user experience for my a couple projects. 
+The [FO.Net](https://archive.codeplex.com/?p=fonet) C# variant was ported from Apache FOP; likely from a pre-v1.0 version of ApacheFOP, but to be 
+honest it has worked incredibly well, and reliably. As a fully managed C# solution, it ran in web projects as well a WinForms projects where viewing 
+the rendered PDF live int the app real-time provided and wonderful user experience for a couple of projects. 
 
-But, as things have evolved the advent of cloud services has opened doors for accomplishing this in a much more powerful/scaleable/manageable way -- particularly Azure Functions and their excellent support for varios technology languages (.Net, Java, NodeJS, etc.)!
+But, as things have evolved the advent of cloud services has opened doors for accomplishing this in a much more powerful/scaleable/manageable way -- particularly Azure Functions and their excellent support for varios technology languages including: .Net, Java, NodeJS, etc.!
 
 So I finally had the time to flush out the details, and share this project. I truly hope that it helps many others out!
 

@@ -38,12 +38,14 @@ public class ApacheFopHelper {
             Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, fopOutputStream);
             Transformer transformer = transformerFactory.newTransformer();
 
-            //The Transformer requires both source (input) and result (output) handlers...
-            Source src = new StreamSource(new StringReader(xslFOSource));
-            Result res = new SAXResult(fop.getDefaultHandler());
+            try(StringReader stringReader = new StringReader(xslFOSource)) {
+                //The Transformer requires both source (input) and result (output) handlers...
+                Source src = new StreamSource(stringReader);
+                Result res = new SAXResult(fop.getDefaultHandler());
 
-            //Finally we can execute the transformation!
-            transformer.transform(src, res);
+                //Finally we can execute the transformation!
+                transformer.transform(src, res);
+            }
 
             //We must flush & close the stream (especially if GZIP is enabled) to ensure the outputs are finalized...
             fopOutputStream.flush();

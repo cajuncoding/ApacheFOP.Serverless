@@ -12,11 +12,11 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.zip.GZIPOutputStream;
 
-public class ApacheFopHelper {
+public class ApacheFOPHelper {
     private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
     private final FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
 
-    public ApacheFopHelper() {
+    public ApacheFOPHelper() {
     }
 
     public byte[] renderPdfBytes(String xslFOSource, boolean gzipEnabled) throws IOException, TransformerException, FOPException {

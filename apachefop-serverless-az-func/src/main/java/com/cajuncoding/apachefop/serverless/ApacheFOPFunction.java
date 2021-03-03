@@ -1,6 +1,6 @@
 package com.cajuncoding.apachefop.serverless;
 
-import com.cajuncoding.apachefop.serverless.helpers.ApacheFopHelper;
+import com.cajuncoding.apachefop.serverless.helpers.ApacheFOPHelper;
 import com.cajuncoding.apachefop.serverless.helpers.HttpEncodings;
 import com.cajuncoding.apachefop.serverless.helpers.HttpHeaders;
 import com.microsoft.azure.functions.*;
@@ -52,7 +52,7 @@ public class ApacheFOPFunction {
             context.getLogger().info(" - Executing Transformation with Apache FOP...");
 
             //Execute the transformation of the XSL-FO source content to Binary PDF format...
-            ApacheFopHelper fopHelper = new ApacheFopHelper();
+            ApacheFOPHelper fopHelper = new ApacheFOPHelper();
             byte[] fopPdfBytes = fopHelper.renderPdfBytes(xslFOBodyContent, gzipEnabled);
 
             //Lets create a unique filename -- because that's helpful to the client...

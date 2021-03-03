@@ -28,7 +28,7 @@ public class ApacheFOPFunction {
      */
     @FunctionName("ApacheFOP")
     public HttpResponseMessage run(
-            @HttpTrigger(name = "req", route="apache-fop/xslfo", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.ANONYMOUS)
+            @HttpTrigger(name = "req", route="apache-fop/xslfo", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION)
             HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context
     ) {

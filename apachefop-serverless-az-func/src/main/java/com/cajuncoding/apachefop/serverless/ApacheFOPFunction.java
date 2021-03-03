@@ -1,12 +1,12 @@
 package com.cajuncoding.apachefop.serverless;
 
 import com.cajuncoding.apachefop.serverless.helpers.ApacheFopHelper;
-import com.cajuncoding.apachefop.serverless.helpers.HttpResponseHeaders;
+import com.cajuncoding.apachefop.serverless.helpers.HttpEncodings;
+import com.cajuncoding.apachefop.serverless.helpers.HttpHeaders;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
-import com.sun.deploy.net.HttpRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.MimeConstants;
 
@@ -19,7 +19,7 @@ import java.util.Optional;
  * Azure Functions with HTTP Trigger.
  */
 public class ApacheFOPFunction {
-    private final SimpleDateFormat dateFormatW3C = new SimpleDateFormat("YYYY-MM-dd'T'hh:mm:ss");
+    private final SimpleDateFormat dateFormatW3C = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
     /**
      * This function listens at endpoint "/api/apache-fop/xslfo". Two ways to invoke it using "curl" command in bash:
@@ -44,8 +44,8 @@ public class ApacheFOPFunction {
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("A valid XSL-FO body content must be specified.").build();
         }
 
-        String acceptEncodingHeader = request.getHeaders().getOrDefault(HttpRequest.ACCEPT_ENCODING, "");
-        boolean gzipEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpRequest.GZIP_ENCODING);
+        String acceptEncodingHeader = request.getHeaders().getOrDefault(HttpHeaders.ACCEPT_ENCODING, "");
+        boolean gzipEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
 
         //Now we process the XSL-FO source...
         try {
@@ -63,11 +63,11 @@ public class ApacheFOPFunction {
             HttpResponseMessage resp = request
                     .createResponseBuilder(HttpStatus.OK)
                     .body(fopPdfBytes)
-                    .header(HttpResponseHeaders.CONTENT_TYPE, MimeConstants.MIME_PDF)
-                    .header(HttpResponseHeaders.CONTENT_LENGTH, Integer.toString(fopPdfBytes.length))
-                    .header(HttpResponseHeaders.CONTENT_DISPOSITION, MessageFormat.format("inline; filename=\"{0}\"", fileName))
-                    //If GZIP is enabled then specify the proper encdoing in the HttpResponse!
-                    .header(HttpResponseHeaders.CONTENT_ENCODING, gzipEnabled ? HttpResponseHeaders.GZIP_ENCODING : HttpResponseHeaders.IDENTITY_ENCODING)
+                    .header(HttpHeaders.CONTENT_TYPE, MimeConstants.MIME_PDF)
+                    .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(fopPdfBytes.length))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, MessageFormat.format("inline; filename=\"{0}\"", fileName))
+                    //If GZIP is enabled then specify the proper encoding in the HttpResponse!
+                    .header(HttpHeaders.CONTENT_ENCODING, gzipEnabled ? HttpEncodings.GZIP_ENCODING : HttpEncodings.IDENTITY_ENCODING)
                     .build();
 
             return resp;

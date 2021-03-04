@@ -1,20 +1,23 @@
 package com.cajuncoding.apachefop.serverless.helpers;
 
-import org.apache.fop.apps.FOPException;
-import org.apache.fop.apps.Fop;
-import org.apache.fop.apps.FopFactory;
-import org.apache.fop.apps.MimeConstants;
+import org.apache.fop.apps.*;
+import org.apache.fop.configuration.ConfigurationException;
+import org.apache.fop.configuration.DefaultConfigurationBuilder;
 
 import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.text.SimpleDateFormat;
+import java.text.MessageFormat;
 import java.util.zip.GZIPOutputStream;
 
 public class ApacheFOPHelper {
-    private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
-    private final FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
+    //FOPFactory is expected to be re-used as noted in Apache 'overview' section here:
+    //  https://xmlgraphics.apache.org/fop/1.1/embedding.html
+    private static final FopFactory fopFactory = createApacheFOPFactory();
+    //TransformerFactory may be re-used as a singleton as long as it's never mutated/modified directly by
+    //  more than one thread (e.g. configuration changes on the Factory class).
+    private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
     public ApacheFOPHelper() {
     }
@@ -26,8 +29,7 @@ public class ApacheFOPHelper {
             ByteArrayOutputStream pdfBaseOutputStream = new ByteArrayOutputStream();
             //If GZIP is enabled then wrap the core ByteArrayOutputStream as a GZIP compression output stream...
             OutputStream fopOutputStream = (gzipEnabled) ? new GZIPOutputStream(pdfBaseOutputStream) : pdfBaseOutputStream;
-        )
-        {
+        ) {
             //In order to transform the input source into the Binary Pdf output we must initialize a new
             //  Fop (i.e. Formatting Object Processor), and a new Xsl Transformer that executes the transform.
             //  NOTE: Apache FOP uses the event based XSLT processing engine from SAX for optimized processing;
@@ -37,6 +39,9 @@ public class ApacheFOPHelper {
             //          and memory utilization.
             Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, fopOutputStream);
             Transformer transformer = transformerFactory.newTransformer();
+
+//            System.out.println("XML CONFIG:");
+//            System.out.println(xmlConfigText);
 
             try(StringReader stringReader = new StringReader(xslFOSource)) {
                 //The Transformer requires both source (input) and result (output) handlers...
@@ -57,5 +62,51 @@ public class ApacheFOPHelper {
             return pdfBytes;
         }
     }
+
+    public static FopFactory createApacheFOPFactory() {
+        var classLoader = ApacheFOPHelper.class.getClassLoader();
+        var baseUri = new File(".").toURI();
+        var configFilePath = ApacheFOPConstants.ConfigXmlResourceName;
+        FopFactory fopFactory = null;
+
+        try(var configStream = classLoader.getResourceAsStream(configFilePath);) {
+            if(configStream != null) {
+                //Attempt to initialize with Configuration loaded from Configuration XML Resource file...
+                var cfgBuilder = new DefaultConfigurationBuilder();
+                var cfg = cfgBuilder.build(configStream);
+                var fopFactoryBuilder = new FopFactoryBuilder(baseUri).setConfiguration(cfg);
+
+                fopFactory = fopFactoryBuilder.build();
+            }
+        }
+        catch (IOException | ConfigurationException e) {
+            //DO NOTHING if Configuration is Invalid; log info. for troubleshooting.
+            System.out.println(MessageFormat.format(
+         "An Exception occurred loading the Configuration file [{0}]; {1}",
+                configFilePath,
+                e.getMessage()
+            ));
+        }
+
+        //Safely Initialize will All DEFAULTS if not loaded with Configuration...
+        if(fopFactory == null) {
+            fopFactory = FopFactory.newInstance(baseUri);
+        }
+
+        return fopFactory;
+    }
+
+//    public static String loadApacheFopConfigXmlText() {
+//        ClassLoader classLoader = ApacheFOPHelper.class.getClassLoader();
+//        try(var resourceStream = classLoader.getResourceAsStream("apache-fop-config.xml");) {
+//
+//            return (resourceStream != null)
+//                ? IOUtils.toString(resourceStream, StandardCharsets.UTF_8)
+//                : null;
+//
+//        } catch (IOException e) {
+//            return null;
+//        }
+//    }
 
 }

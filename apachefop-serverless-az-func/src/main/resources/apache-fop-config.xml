@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<fop version="1.0">
+    <!-- Strict user configuration -->
+    <!-- <strict-configuration>true</strict-configuration>-->
+    <!-- Strict FO validation -->
+    <!-- <strict-validation>true</strict-validation>-->
+
+    <!-- Base URL for resolving relative URLs -->
+    <base>./</base>
+    <!-- Source resolution in dpi (dots/pixels per inch) for determining the size of pixels in SVG and bitmap images, default: 72dpi -->
+    <source-resolution>72</source-resolution>
+    <!-- Source resolution in dpi (dots/pixels per inch) for determining the size of pixels in SVG and bitmap images, default: 72dpi -->
+    <target-resolution>72</target-resolution>
+    <!-- default page-height and page-width, in case either height or width value is specified as auto -->
+    <default-page-settings height="11in" width="8.5in" />
+
+    <!-- All fonts information that has been gathered as a result of "directory" or "auto-detect" font configurations will be cached for future rendering runs.-->
+    <use-cache>true</use-cache>
+
+    <renderers>
+        <renderer mime="application/pdf">
+            <filterList>
+                <!-- provides compression using zlib flate (default is on) -->
+                <value>flate</value>
+            </filterList>
+            <fonts>
+                <!-- automatically detect operating system installed fonts -->
+                <!-- More Details Here: https://xmlgraphics.apache.org/fop/2.6/fonts.html -->
+                <auto-detect/>
+            </fonts>
+        </renderer>
+    </renderers>
+</fop>

@@ -32,17 +32,19 @@ public class ApacheFOPFunction {
             HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context
     ) {
-
-        context.getLogger().info("ApacheFOP Serverless HTTP trigger processing a request...");
+        var logger =  context.getLogger();
+        logger.info("ApacheFOP Serverless HTTP trigger processing a request...");
 
         // Safely parse & validate the body content parameter as the XSL-FO source...
         Optional<String> bodyContent = request.getBody();
         String xslFOBodyContent = bodyContent.isPresent() ? bodyContent.get().trim() : "";
         if (StringUtils.isBlank(xslFOBodyContent))
         {
-            context.getLogger().info(" - [BAD_REQUEST - 400] No XSL-FO body content was specified");
+            logger.info(" - [BAD_REQUEST - 400] No XSL-FO body content was specified");
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("A valid XSL-FO body content must be specified.").build();
         }
+
+        logger.info(MessageFormat.format(" - XSL-FO body content [Length={0}]", xslFOBodyContent.length()));
 
         String acceptEncodingHeader = request.getHeaders().getOrDefault(HttpHeaders.ACCEPT_ENCODING, "");
         boolean gzipEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);

@@ -21,7 +21,7 @@ Updated the project to v1.1 as it now incorporates the following new updates:
  - Bumping the Apache FOP version to v2.6 (just released in Jan 2021)
  - Adding support for configuration Xml to fully configure ApacheFOP Factory by editing the `/src/main/resources/apache-fop-config.xml' as needed.
    - _The configuration will be bundled and deployed with the application._
- - Provide existing config file which enables Font 'auto-detect' feature for much better Font support.
+ - Now includes an existing `apache-fop-config.xml` file which enables Font 'auto-detect' feature for much better Font support.
  - Removed dependency on `com.sun.deploy.net.HttpRequest` import as importing it no longer compiles on the latest versions of IntelliJ IDEA; little value was added by using only one constant that was needed: _ACCEPT_ENCODING_
  - All Heading and Content type constants are now self-contained so no additional dependencies are needed.
    - _This enabled removal of the dependency on com.sun.deploy.net.HttpRequest import as importing it no longer compiles on the latest versions of IntelliJ IDEA, and is a bad practice.  Little value was added by using only 1 constant was needed, ACCEPT_ENCODING_

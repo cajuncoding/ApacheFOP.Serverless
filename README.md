@@ -3,7 +3,35 @@
 
 You should be able to pull this code down, open with IntelliJ (after installing the Azure Toolkit for IntelliJ), and deploy to your own Subscription/Resource group and be up and running in minutes.
 
-### Technical Summary:
+If you like this project and/or use it the please give me a Star (c'mon it's free, and it'll make my day)! 
+
+### [Buy me a Coffee ☕](https://www.buymeacoffee.com/cajuncoding)
+*I'm happy to share with the community, but if you find this useful (e.g for professional use), and are so inclinded,
+then I do love-me-some-coffee!*
+
+<a href="https://www.buymeacoffee.com/cajuncoding" target="_blank">
+<img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174">
+</a> 
+
+## Updates
+Updated the project to v1.1 as it now incorporates the following new updates:
+ - Upgraded the project to use Java v11 now as the latest long term supported (LTS) version for Azure Functions (aka Zulu Java v11)
+   - _Previously was Java 8 (v1.8) (aka Zulu Java v8)._
+ - Bumping the versions of all dependencies to the latest stable versions
+ - Bumping the Apache FOP version to v2.6 (just released in Jan 2021)
+ - Adding support for configuration Xml to fully configure ApacheFOP Factory by editing the `/src/main/resources/apache-fop-config.xml' as needed.
+   - _The configuration will be bundled and deployed with the application._
+ - Now includes an existing `apache-fop-config.xml` file which enables Font 'auto-detect' feature for much better Font support.
+ - Removed dependency on `com.sun.deploy.net.HttpRequest` import as importing it no longer compiles on the latest versions of IntelliJ IDEA; little value was added by using only one constant that was needed: _ACCEPT_ENCODING_
+ - All Heading and Content type constants are now self-contained so no additional dependencies are needed.
+   - _This enabled removal of the dependency on com.sun.deploy.net.HttpRequest import as importing it no longer compiles on the latest versions of IntelliJ IDEA, and is a bad practice.  Little value was added by using only 1 constant was needed, ACCEPT_ENCODING_
+
+ - Notable cleanup & optimization of the Pom.xml
+ - Implemented a fix for a possilbe deployment risk when AppName and ResourceGroupName values are not unique with the azure-functions-maven-plugin
+   - _As noted here: https://github.com/Azure/azure-functions-java-worker/issues/140_
+
+
+## Technical Summary:
 This project provides a REST API that recieves a POST body containing a well formed Xsl-FO Xml document ([like these Apache FOP samples](https://github.com/apache/xmlgraphics-fop/tree/trunk/fop/examples/fo/basic)). The service will respond with the rendered Pdf binary (file bytes).
 
 If an error occurs -- likely due to incorrect Xsl-FO syntax or structure -- then an Http 500 Response will be returned with a JSON payload containing details about the error.  For issues with the Xsl-FO parsing/processing, ApacheFOP generally provides very helpful info. about the line, location, and markup that caused the error so that it can be resolved.

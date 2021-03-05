@@ -60,8 +60,12 @@ public class ApacheFOPFunction {
             context.getLogger().info(" - Executing Transformation with Apache FOP...");
 
             //Execute the transformation of the XSL-FO source content to Binary PDF format...
-            ApacheFOPHelper fopHelper = new ApacheFOPHelper();
-            byte[] fopPdfBytes = fopHelper.renderPdfBytes(xslFOBodyContent, gzipEnabled);
+            ApacheFOPHelper fopHelper = new ApacheFOPHelper(logger);
+            var pdfRenderResult = fopHelper.renderPdfResult(xslFOBodyContent, gzipEnabled);
+
+            //Get the results of Apache FOP processing...
+            byte[] fopPdfBytes = pdfRenderResult.getPdfBytes();
+            String eventLogText = pdfRenderResult.getEventsLogAsHeaderValue();
 
             //Lets create a unique filename -- because that's helpful to the client...
             Calendar cal = Calendar.getInstance();
@@ -74,6 +78,7 @@ public class ApacheFOPFunction {
                     .header(HttpHeaders.CONTENT_TYPE, MimeConstants.MIME_PDF)
                     .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(fopPdfBytes.length))
                     .header(HttpHeaders.CONTENT_DISPOSITION, MessageFormat.format("inline; filename=\"{0}\"", fileName))
+                    .header(HttpHeaders.APACHEFOP_SERVERLESS_EVENTLOG, eventLogText)
                     //If GZIP is enabled then specify the proper encoding in the HttpResponse!
                     .header(HttpHeaders.CONTENT_ENCODING, gzipEnabled ? HttpEncodings.GZIP_ENCODING : HttpEncodings.IDENTITY_ENCODING)
                     .build();

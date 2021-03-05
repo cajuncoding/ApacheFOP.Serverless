@@ -9,6 +9,7 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.text.MessageFormat;
+import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 public class ApacheFOPHelper {
@@ -19,10 +20,13 @@ public class ApacheFOPHelper {
     //  more than one thread (e.g. configuration changes on the Factory class).
     private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
-    public ApacheFOPHelper() {
+    private Logger logger = null;
+
+    public ApacheFOPHelper(Logger optionalLogger) {
+        this.logger = optionalLogger;
     }
 
-    public byte[] renderPdfBytes(String xslFOSource, boolean gzipEnabled) throws IOException, TransformerException, FOPException {
+    public ApacheFOPRenderResult renderPdfResult(String xslFOSource, boolean gzipEnabled) throws IOException, TransformerException, FOPException {
         //We want to manage the output in memory to eliminate any overhead or risks of using the file-system
         //  (e.g. file cleanup, I/O issues, etc.).
         try(
@@ -30,6 +34,11 @@ public class ApacheFOPHelper {
             //If GZIP is enabled then wrap the core ByteArrayOutputStream as a GZIP compression output stream...
             OutputStream fopOutputStream = (gzipEnabled) ? new GZIPOutputStream(pdfBaseOutputStream) : pdfBaseOutputStream;
         ) {
+            //Enable the Event Listener for capturing Logging details (e.g. parsing/processing Events)...
+            var eventListener = new ApacheFOPEventListener(logger);
+            FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+            foUserAgent.getEventBroadcaster().addEventListener(eventListener);
+
             //In order to transform the input source into the Binary Pdf output we must initialize a new
             //  Fop (i.e. Formatting Object Processor), and a new Xsl Transformer that executes the transform.
             //  NOTE: Apache FOP uses the event based XSLT processing engine from SAX for optimized processing;
@@ -37,11 +46,8 @@ public class ApacheFOPHelper {
             //          Fop is just processing events as they are raised by the transformer.  This is efficient
             //          because the Xml tree is only processed 1 time which aids in optimizing both performance
             //          and memory utilization.
-            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, fopOutputStream);
+            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, fopOutputStream);
             Transformer transformer = transformerFactory.newTransformer();
-
-//            System.out.println("XML CONFIG:");
-//            System.out.println(xmlConfigText);
 
             try(StringReader stringReader = new StringReader(xslFOSource)) {
                 //The Transformer requires both source (input) and result (output) handlers...
@@ -59,7 +65,7 @@ public class ApacheFOPHelper {
             //Once complete we now a binary stream that we can most easily return to the client
             //  as a byte array of binary data...
             byte[] pdfBytes = pdfBaseOutputStream.toByteArray();
-            return pdfBytes;
+            return new ApacheFOPRenderResult(pdfBytes, eventListener);
         }
     }
 

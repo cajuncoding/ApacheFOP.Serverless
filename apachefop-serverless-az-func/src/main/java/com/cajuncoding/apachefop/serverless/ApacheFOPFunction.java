@@ -23,8 +23,6 @@ public class ApacheFOPFunction {
 
     /**
      * This function listens at endpoint "/api/apache-fop/xslfo". Two ways to invoke it using "curl" command in bash:
-     * 1. curl -d "HTTP Body" {your host}/api/HttpExample
-     * 2. curl "{your host}/api/HttpExample?name=HTTP%20Query"
      */
     @FunctionName("ApacheFOP")
     public HttpResponseMessage run(
@@ -41,12 +39,20 @@ public class ApacheFOPFunction {
         if (StringUtils.isBlank(xslFOBodyContent))
         {
             logger.info(" - [BAD_REQUEST - 400] No XSL-FO body content was specified");
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST).body("A valid XSL-FO body content must be specified.").build();
+            return request
+                    .createResponseBuilder(HttpStatus.BAD_REQUEST)
+                    .body("A valid XSL-FO body content must be specified.")
+                    .build();
         }
 
         logger.info(MessageFormat.format(" - XSL-FO body content [Length={0}]", xslFOBodyContent.length()));
 
-        String acceptEncodingHeader = request.getHeaders().getOrDefault(HttpHeaders.ACCEPT_ENCODING, "");
+        String acceptEncodingHeader = request.getHeaders().getOrDefault(
+            //NOTE: Headers are LowerCased in the returned Map!
+            HttpHeaders.ACCEPT_ENCODING_LOWERCASE,
+            ""
+        );
+
         boolean gzipEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
 
         //Now we process the XSL-FO source...

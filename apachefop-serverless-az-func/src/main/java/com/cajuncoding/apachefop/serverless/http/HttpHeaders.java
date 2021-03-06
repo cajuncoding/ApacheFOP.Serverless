@@ -1,4 +1,4 @@
-package com.cajuncoding.apachefop.serverless.helpers;
+package com.cajuncoding.apachefop.serverless.http;
 
 public class HttpHeaders {
     public static final String ACCEPT_ENCODING = "Accept-Encoding";
@@ -8,7 +8,4 @@ public class HttpHeaders {
     public static final String CONTENT_ENCODING = "Content-Encoding";
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
-
-    public static final String APACHEFOP_SERVERLESS_EVENTLOG = "ApacheFOP-Serverless-EventLog";
-
 }

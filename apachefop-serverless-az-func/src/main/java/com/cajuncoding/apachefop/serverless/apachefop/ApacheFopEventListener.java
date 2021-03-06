@@ -1,4 +1,4 @@
-package com.cajuncoding.apachefop.serverless.helpers;
+package com.cajuncoding.apachefop.serverless.apachefop;
 
 import org.apache.fop.events.Event;
 import org.apache.fop.events.EventFormatter;
@@ -11,14 +11,14 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 /** A simple event listener that captures the events into a Collection handling. */
-public class ApacheFOPEventListener implements EventListener {
+public class ApacheFopEventListener implements EventListener {
     private List<Event> eventsList = new ArrayList<>();
     private Logger logger = null;
 
-    public ApacheFOPEventListener() {
+    public ApacheFopEventListener() {
     }
 
-    public ApacheFOPEventListener(Logger optionalLogger) {
+    public ApacheFopEventListener(Logger optionalLogger) {
         this.logger = optionalLogger;
     }
 
@@ -38,11 +38,15 @@ public class ApacheFOPEventListener implements EventListener {
         return eventMsg;
     }
 
-    public String GetEventsText(boolean includeLineSeparators) {
-        return GetEventsText(e -> true, includeLineSeparators);
+    public String GetEventsText() {
+        return GetEventsText(e -> true, System.lineSeparator());
     }
 
-    public String GetEventsText(Predicate<Event> eventFilter, boolean includeLineSeparators)
+    public String GetEventsText(String lineSeparator) {
+        return GetEventsText(e -> true, lineSeparator);
+    }
+
+    public String GetEventsText(Predicate<Event> eventFilter, String lineSeparator)
     {
         var stringBuilder = new StringBuilder();
         for(var event : eventsList) {
@@ -51,13 +55,9 @@ public class ApacheFOPEventListener implements EventListener {
                 EventSeverity severity = event.getSeverity();
 
                 stringBuilder
-                        .append("[").append(severity.getName()).append("] ")
-                        .append(msg);
-
-                if(includeLineSeparators) {
-                    //Proper Header Line Break is CRLF...
-                    stringBuilder.append("\r\n");
-                }
+                    .append("[").append(severity.getName()).append("] ")
+                    .append(msg)
+                    .append(lineSeparator);
             }
         }
 

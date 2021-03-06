@@ -1,4 +1,4 @@
-package com.cajuncoding.apachefop.serverless.helpers;
+package com.cajuncoding.apachefop.serverless.http;
 
 public class HttpEncodings {
     public static final String IDENTITY_ENCODING = "identity";

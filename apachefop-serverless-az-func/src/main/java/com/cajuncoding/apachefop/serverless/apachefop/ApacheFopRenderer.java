@@ -1,5 +1,6 @@
-package com.cajuncoding.apachefop.serverless.helpers;
+package com.cajuncoding.apachefop.serverless.apachefop;
 
+import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConstants;
 import org.apache.fop.apps.*;
 import org.apache.fop.configuration.ConfigurationException;
 import org.apache.fop.configuration.DefaultConfigurationBuilder;
@@ -12,21 +13,25 @@ import java.text.MessageFormat;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
-public class ApacheFOPHelper {
+public class ApacheFopRenderer {
     //FOPFactory is expected to be re-used as noted in Apache 'overview' section here:
     //  https://xmlgraphics.apache.org/fop/1.1/embedding.html
-    private static final FopFactory fopFactory = createApacheFOPFactory();
+    private static final FopFactory fopFactory = createApacheFopFactory();
     //TransformerFactory may be re-used as a singleton as long as it's never mutated/modified directly by
     //  more than one thread (e.g. configuration changes on the Factory class).
     private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
     private Logger logger = null;
 
-    public ApacheFOPHelper(Logger optionalLogger) {
+    public ApacheFopRenderer() {
+        this.logger = null;
+    }
+
+    public ApacheFopRenderer(Logger optionalLogger) {
         this.logger = optionalLogger;
     }
 
-    public ApacheFOPRenderResult renderPdfResult(String xslFOSource, boolean gzipEnabled) throws IOException, TransformerException, FOPException {
+    public ApacheFopRenderResult renderPdfResult(String xslFOSource, boolean gzipEnabled) throws IOException, TransformerException, FOPException {
         //We want to manage the output in memory to eliminate any overhead or risks of using the file-system
         //  (e.g. file cleanup, I/O issues, etc.).
         try(
@@ -35,7 +40,7 @@ public class ApacheFOPHelper {
             OutputStream fopOutputStream = (gzipEnabled) ? new GZIPOutputStream(pdfBaseOutputStream) : pdfBaseOutputStream;
         ) {
             //Enable the Event Listener for capturing Logging details (e.g. parsing/processing Events)...
-            var eventListener = new ApacheFOPEventListener(logger);
+            var eventListener = new ApacheFopEventListener(logger);
             FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
             foUserAgent.getEventBroadcaster().addEventListener(eventListener);
 
@@ -65,14 +70,14 @@ public class ApacheFOPHelper {
             //Once complete we now a binary stream that we can most easily return to the client
             //  as a byte array of binary data...
             byte[] pdfBytes = pdfBaseOutputStream.toByteArray();
-            return new ApacheFOPRenderResult(pdfBytes, eventListener);
+            return new ApacheFopRenderResult(pdfBytes, eventListener);
         }
     }
 
-    public static FopFactory createApacheFOPFactory() {
-        var classLoader = ApacheFOPHelper.class.getClassLoader();
+    public static FopFactory createApacheFopFactory() {
+        var classLoader = ApacheFopRenderer.class.getClassLoader();
         var baseUri = new File(".").toURI();
-        var configFilePath = ApacheFOPConstants.ConfigXmlResourceName;
+        var configFilePath = ApacheFopServerlessConstants.ConfigXmlResourceName;
         FopFactory fopFactory = null;
 
         try(var configStream = classLoader.getResourceAsStream(configFilePath);) {

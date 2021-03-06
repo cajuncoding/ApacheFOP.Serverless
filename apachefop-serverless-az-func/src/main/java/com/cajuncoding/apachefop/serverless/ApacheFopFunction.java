@@ -43,11 +43,16 @@ public class ApacheFopFunction {
             return responseBuilder.BuildBadXslFoBodyResponse(request);
         }
 
-        logger.info(MessageFormat.format(" - XSL-FO body content [Length={0}]", xslFOBodyContent.length()));
+        logger.info(MessageFormat.format(" - XSL-FO Payload [Length={0}]", xslFOBodyContent.length()));
 
         //Now we process the XSL-FO source...
         try {
             context.getLogger().info(" - Executing Transformation with Apache FOP...");
+
+            //Log the Full XSL-FO Payload from the Request if Debugging is enabled...
+            if(config.isDebuggingEnabled()) {
+                logger.info("[DEBUG] XSL-FO Payload Received:".concat(System.lineSeparator()).concat(xslFOBodyContent));
+            }
 
             //Initialize the ApacheFopRenderer (potentially optimized with less logging.
             //NOTE: If used, the Logger must be the instance injected into the Azure Function!

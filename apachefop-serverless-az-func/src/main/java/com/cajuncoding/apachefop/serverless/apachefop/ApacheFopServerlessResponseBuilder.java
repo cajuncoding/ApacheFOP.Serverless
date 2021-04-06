@@ -14,14 +14,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Optional;
 
-public class ApacheFopServerlessResponseBuilder {
+public class ApacheFopServerlessResponseBuilder<TRequest> {
     private final SimpleDateFormat dateFormatW3C = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
     public ApacheFopServerlessResponseBuilder() {
     }
 
     public HttpResponseMessage BuildBadXslFoBodyResponse(
-            HttpRequestMessage<Optional<String>> request
+            HttpRequestMessage<Optional<TRequest>> request
     ) {
         var response = request
                 .createResponseBuilder(HttpStatus.BAD_REQUEST)
@@ -32,7 +32,7 @@ public class ApacheFopServerlessResponseBuilder {
     }
 
     public HttpResponseMessage BuildPdfResponse(
-            HttpRequestMessage<Optional<String>> request,
+            HttpRequestMessage<Optional<TRequest>> request,
             ApacheFopRenderResult pdfRenderResult,
             ApacheFopServerlessConfig config
     ) {
@@ -45,7 +45,7 @@ public class ApacheFopServerlessResponseBuilder {
         //Lets create a unique filename -- because that's helpful to the client...
         Calendar cal = Calendar.getInstance();
         String fileName = dateFormatW3C.format(cal.getTime()) + "_RenderedPdf.pdf";
-        String contentEncoding = config.isGzipEnabled()
+        String contentEncoding = config.isGzipResponseEnabled()
                 ? HttpEncodings.GZIP_ENCODING
                 : HttpEncodings.IDENTITY_ENCODING;
 
@@ -65,7 +65,7 @@ public class ApacheFopServerlessResponseBuilder {
     }
 
     public HttpResponseMessage BuildEventLogDumpResponse(
-            HttpRequestMessage<Optional<String>> request,
+            HttpRequestMessage<Optional<TRequest>> request,
             ApacheFopRenderResult pdfRenderResult,
             ApacheFopServerlessConfig config
     ) {

@@ -24,8 +24,13 @@
                 <value>flate</value>
             </filterList>
             <fonts>
-                <!-- automatically detect operating system installed fonts -->
-                <!-- More Details Here: https://xmlgraphics.apache.org/fop/2.6/fonts.html -->
+                <!-- Automatically detect operating system installed fonts; More Details Here: https://xmlgraphics.apache.org/fop/2.6/fonts.html
+                     NOTE: On Windows there are alot of fonts available so the VERY FIRST startup time will be impacted signficantly
+                            (seconds, or even a couple minutes) until a local cache file is built.  Once the cache file is built for a server
+                            though startup times will be normal.
+                     NOTE: In Serverless environments this can be exasperated though because each
+                            new Serverless spun up will not have a cache file by default!
+                -->
                 <auto-detect/>
             </fonts>
         </renderer>

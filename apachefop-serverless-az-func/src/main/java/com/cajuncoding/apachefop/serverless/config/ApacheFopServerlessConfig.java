@@ -8,13 +8,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
 
-public class ApacheFopServerlessConfig {
+public class ApacheFopServerlessConfig<T> {
     private boolean debuggingEnabled = false;
     private boolean apacheFopLoggingEnabled  = true;
-    private boolean gzipEnabled = false;
+    private boolean isGzipRequestEnabled = false;
+    private boolean isGzipResponseEnabled = false;
     private boolean eventLogDumpModeEnabled = false;
 
-    public ApacheFopServerlessConfig(HttpRequestMessage<Optional<String>> request) {
+    public ApacheFopServerlessConfig(HttpRequestMessage<Optional<T>> request) {
         ReadEnvironmentConfig();
         ReadRequestConfig(request);
     }
@@ -29,13 +30,18 @@ public class ApacheFopServerlessConfig {
         this.apacheFopLoggingEnabled = getConfigAsBooleanOrDefault("ApacheFopLoggingEnabled", true);
     }
 
-    private void ReadRequestConfig(HttpRequestMessage<Optional<String>> request) {
+    private void ReadRequestConfig(HttpRequestMessage<Optional<T>> request) {
         var headers = request.getHeaders();
 
+        //Determine if the current request Content Encodings specified contain GZIP (as that's all that is currently supported).
+        //NOTE: Headers are LowerCased in the returned Map!
+        String contentEncodingHeader = headers.getOrDefault(HttpHeaders.CONTENT_ENCODING_LOWERCASE, null);
+        this.isGzipRequestEnabled = StringUtils.containsIgnoreCase(contentEncodingHeader, HttpEncodings.GZIP_ENCODING);
+
+        //Determine if the Acceptable Encodings specified contain GZIP (as that's all that is currently supported).
         //NOTE: Headers are LowerCased in the returned Map!
         String acceptEncodingHeader = headers.getOrDefault(HttpHeaders.ACCEPT_ENCODING_LOWERCASE, null);
-        //Determine if the Encodings specified contain GZIP (as that's all that is currently supported).
-        this.gzipEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
+        this.isGzipResponseEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
 
         //Determine if Event Log Dump mode is enabled (vs PDF Binary return).
         var queryParams = request.getQueryParameters();
@@ -52,8 +58,12 @@ public class ApacheFopServerlessConfig {
         return debuggingEnabled;
     }
 
-    public boolean isGzipEnabled() {
-        return gzipEnabled;
+    public boolean isGzipRequestEnabled() {
+        return isGzipResponseEnabled;
+    }
+
+    public boolean isGzipResponseEnabled() {
+        return isGzipResponseEnabled;
     }
 
     public boolean isEventLogDumpModeEnabled() {

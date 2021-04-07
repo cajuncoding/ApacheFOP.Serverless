@@ -13,6 +13,7 @@ public class ApacheFopServerlessConfig<T> {
     private boolean isGzipRequestEnabled = false;
     private boolean isGzipResponseEnabled = false;
     private boolean isBase64RequestEnabled = false;
+    private String apacheFopServerlessContentType = StringUtils.EMPTY;
 
     //Azure Function Configuration Settings...
     private boolean debuggingEnabled = false;
@@ -26,9 +27,9 @@ public class ApacheFopServerlessConfig<T> {
     }
 
     private void ReadEnvironmentConfig() {
-        //For performance we default Debugging to being disabled;
-        // this saves unnecessary logging, returning of Debug Headers, etc.)
-        this.debuggingEnabled = getConfigAsBooleanOrDefault("DebuggingEnabled", false);
+        //Enable Debugging by default which enables the Apache FOP Event Log to be returned via Response Header, etc.
+        //NOTE: this can be disabled to save unnecessary logging, returning of Debug Headers, etc.
+        this.debuggingEnabled = getConfigAsBooleanOrDefault("DebuggingEnabled", true);
 
         //Enable ApacheFop logging to AppInsights by default to ensure detailed logs; and AppInsights
         //  provides performance batching of logs to minimize impact.
@@ -58,6 +59,12 @@ public class ApacheFopServerlessConfig<T> {
         this.eventLogDumpModeEnabled = BooleanUtils.toBoolean(
             queryParams.getOrDefault(ApacheFopServerlessQueryParams.EventLogDump, null)
         );
+
+        //Get the Custom ContentType specified for reference
+        this.apacheFopServerlessContentType = headers.getOrDefault(
+            ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_CONTENT_TYPE_LOWERCASE,
+            StringUtils.EMPTY
+        );
     }
 
     //****************************************************************
@@ -72,6 +79,8 @@ public class ApacheFopServerlessConfig<T> {
     }
 
     public boolean isGzipRequestSupported() { return isGzipRequestSupported; }
+
+    public String getApacheFopServerlessContentType() { return apacheFopServerlessContentType; }
 
     //****************************************************************
     //Azure Function Configuration Settings...

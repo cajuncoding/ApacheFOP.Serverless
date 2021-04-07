@@ -1,10 +1,14 @@
-package com.cajuncoding.apachefop.serverless.compression;
+package com.cajuncoding.apachefop.serverless.utils;
 
 import org.apache.commons.io.IOUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.zip.GZIPInputStream;
@@ -33,6 +37,10 @@ public class GzipUtils {
         return result;
     }
 
+    public static String compressToBase64(String textData) throws IOException {
+        return compressToBase64(textData.getBytes(StandardCharsets.UTF_8));
+    }
+
     public static byte[] decompressData(byte[] compressedBytes) throws IOException {
         try (
             var inputByteArrayStream = new ByteArrayInputStream(compressedBytes);
@@ -43,13 +51,13 @@ public class GzipUtils {
         }
     }
 
-    public static String decompressToString(byte[] compressedBytes) throws IOException {
-        return decompressToString(compressedBytes, StandardCharsets.UTF_8);
-    }
-
     public static String decompressToString(byte[] compressedBytes, Charset encoding) throws IOException {
         var bytes = decompressData(compressedBytes);
         return new String(bytes, encoding);
+    }
+
+    public static String decompressToString(byte[] compressedBytes) throws IOException {
+        return decompressToString(compressedBytes, StandardCharsets.UTF_8);
     }
 
     public static String decompressBase64ToString(String compressedBase64, Charset encoding) throws IOException {

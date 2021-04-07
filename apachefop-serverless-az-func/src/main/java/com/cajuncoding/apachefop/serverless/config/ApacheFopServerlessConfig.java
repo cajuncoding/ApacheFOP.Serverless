@@ -9,10 +9,15 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Optional;
 
 public class ApacheFopServerlessConfig<T> {
-    private boolean debuggingEnabled = false;
-    private boolean apacheFopLoggingEnabled  = true;
+    //Request Configuration Parameters...
     private boolean isGzipRequestEnabled = false;
     private boolean isGzipResponseEnabled = false;
+    private boolean isBase64RequestEnabled = false;
+
+    //Azure Function Configuration Settings...
+    private boolean debuggingEnabled = false;
+    private boolean apacheFopLoggingEnabled  = true;
+    private boolean isGzipRequestSupported = true;
     private boolean eventLogDumpModeEnabled = false;
 
     public ApacheFopServerlessConfig(HttpRequestMessage<Optional<T>> request) {
@@ -28,6 +33,10 @@ public class ApacheFopServerlessConfig<T> {
         //Enable ApacheFop logging to AppInsights by default to ensure detailed logs; and AppInsights
         //  provides performance batching of logs to minimize impact.
         this.apacheFopLoggingEnabled = getConfigAsBooleanOrDefault("ApacheFopLoggingEnabled", true);
+
+        //Enable support for Gzip Requests for performance improvements; this option provides a way to disable support
+        //  in use-cases or environments where GZIP bombing (e.g. DoS attack) is a risk.
+        this.isGzipRequestSupported =  getConfigAsBooleanOrDefault("GzipRequestSupportEnabled", true);
     }
 
     private void ReadRequestConfig(HttpRequestMessage<Optional<T>> request) {
@@ -37,6 +46,7 @@ public class ApacheFopServerlessConfig<T> {
         //NOTE: Headers are LowerCased in the returned Map!
         String contentEncodingHeader = headers.getOrDefault(HttpHeaders.CONTENT_ENCODING_LOWERCASE, null);
         this.isGzipRequestEnabled = StringUtils.containsIgnoreCase(contentEncodingHeader, HttpEncodings.GZIP_ENCODING);
+        this.isBase64RequestEnabled = StringUtils.containsIgnoreCase(contentEncodingHeader, HttpEncodings.BASE64_ENCODING);
 
         //Determine if the Acceptable Encodings specified contain GZIP (as that's all that is currently supported).
         //NOTE: Headers are LowerCased in the returned Map!
@@ -50,6 +60,9 @@ public class ApacheFopServerlessConfig<T> {
         );
     }
 
+    //****************************************************************
+    //Azure Function Configuration Settings...
+    //****************************************************************
     public boolean isApacheFopLoggingEnabled() {
         return apacheFopLoggingEnabled;
     }
@@ -58,9 +71,14 @@ public class ApacheFopServerlessConfig<T> {
         return debuggingEnabled;
     }
 
-    public boolean isGzipRequestEnabled() {
-        return isGzipResponseEnabled;
-    }
+    public boolean isGzipRequestSupported() { return isGzipRequestSupported; }
+
+    //****************************************************************
+    //Azure Function Configuration Settings...
+    //****************************************************************
+    public boolean isGzipRequestEnabled() { return isGzipRequestEnabled; }
+
+    public boolean isBase64RequestEnabled() { return isBase64RequestEnabled; }
 
     public boolean isGzipResponseEnabled() {
         return isGzipResponseEnabled;
@@ -70,6 +88,9 @@ public class ApacheFopServerlessConfig<T> {
         return eventLogDumpModeEnabled;
     }
 
+    //****************************************************************
+    //Helper methods...
+    //****************************************************************
     private String getConfigValue(String name) {
         String value = System.getenv(name);
         return value;

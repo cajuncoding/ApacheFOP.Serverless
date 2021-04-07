@@ -2,22 +2,18 @@ package com.cajuncoding.apachefop.serverless;
 
 import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopRenderer;
 import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopServerlessResponseBuilder;
-import com.cajuncoding.apachefop.serverless.compression.GzipUtils;
+import com.cajuncoding.apachefop.serverless.utils.GzipUtils;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.util.Base64;
 import java.util.Optional;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -29,7 +25,7 @@ public class ApacheFopFunction {
     @FunctionName("ApacheFOP")
     public HttpResponseMessage run(
             @HttpTrigger(name = "req", route="apache-fop/xslfo", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION)
-            HttpRequestMessage<Optional<String>> request,
+            HttpRequestMessage<Optional<byte[]>> request,
             final ExecutionContext context
     ) {
         var logger =  context.getLogger();
@@ -80,13 +76,32 @@ public class ApacheFopFunction {
         }
     }
 
-    private String getBodyContentSafely(HttpRequestMessage<Optional<String>> request, ApacheFopServerlessConfig config) throws IOException {
+    private String getBodyContentSafely(HttpRequestMessage<Optional<byte[]>> request, ApacheFopServerlessConfig config) throws IOException {
+        //If GZIP Support is not Enabled but is used then the Request is invalid and body content
+        //  could not be parsed/retrieved so we safely return null.
+        if(config.isGzipRequestEnabled() && !config.isGzipRequestSupported()) {
+            //throw new UnsupportedEncodingException("Gzip Encoded Requests are disabled.");
+            return null;
+        }
+
         String bodyContent = null;
         var body = request.getBody();
         if(body.isPresent()) {
-            bodyContent = config.isGzipRequestEnabled()
-                ? GzipUtils.decompressBase64ToString(body.get())
-                : body.get();
+            var bodyBytes = body.get();
+
+            //NOTE: We Support Base64+GZIP or RAW GZIP; because GZIP alone is more optimized,
+            //      but Base64 is easier to test via Postman!
+            if(config.isBase64RequestEnabled() && config.isGzipRequestEnabled())
+            {
+                var bodyText = new String(bodyBytes, StandardCharsets.UTF_8);
+                bodyContent = GzipUtils.decompressBase64ToString(bodyText);
+            }
+            else if (config.isGzipRequestEnabled()) {
+                bodyContent = GzipUtils.decompressToString(bodyBytes);
+            }
+            else {
+                bodyContent = new String(bodyBytes, StandardCharsets.UTF_8);
+            }
         }
         return bodyContent;
     }

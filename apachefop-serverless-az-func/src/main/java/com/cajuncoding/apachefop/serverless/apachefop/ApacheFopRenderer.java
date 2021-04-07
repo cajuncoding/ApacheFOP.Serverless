@@ -107,7 +107,7 @@ public class ApacheFopRenderer {
         return fopFactory;
     }
 
-//    public static String loadApacheFopConfigXmlText() {
+//    public static String getApacheFopConfigXmlText() {
 //        ClassLoader classLoader = ApacheFOPHelper.class.getClassLoader();
 //        try(var resourceStream = classLoader.getResourceAsStream("apache-fop-config.xml");) {
 //

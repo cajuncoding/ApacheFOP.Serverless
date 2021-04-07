@@ -2,6 +2,7 @@ package com.cajuncoding.apachefop.serverless;
 
 import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopRenderer;
 import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopServerlessResponseBuilder;
+import com.cajuncoding.apachefop.serverless.utils.AzureFunctionUtils;
 import com.cajuncoding.apachefop.serverless.utils.GzipUtils;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.microsoft.azure.functions.*;
@@ -39,7 +40,7 @@ public class ApacheFopFunction {
 
         try {
             //Get the XslFO Source from the Request (handling GZip Payloads if specified)...
-            var xslFOBodyContent = getBodyContentSafely(request, config);
+            var xslFOBodyContent = AzureFunctionUtils.getBodyContentSafely(request, config);
             if (StringUtils.isBlank(xslFOBodyContent)) {
                 logger.info(" - [BAD_REQUEST - 400] No XSL-FO body content was specified");
                 return responseBuilder.BuildBadXslFoBodyResponse(request);
@@ -74,35 +75,5 @@ public class ApacheFopFunction {
         catch (Exception ex) {
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body(ex).build();
         }
-    }
-
-    private String getBodyContentSafely(HttpRequestMessage<Optional<byte[]>> request, ApacheFopServerlessConfig config) throws IOException {
-        //If GZIP Support is not Enabled but is used then the Request is invalid and body content
-        //  could not be parsed/retrieved so we safely return null.
-        if(config.isGzipRequestEnabled() && !config.isGzipRequestSupported()) {
-            //throw new UnsupportedEncodingException("Gzip Encoded Requests are disabled.");
-            return null;
-        }
-
-        String bodyContent = null;
-        var body = request.getBody();
-        if(body.isPresent()) {
-            var bodyBytes = body.get();
-
-            //NOTE: We Support Base64+GZIP or RAW GZIP; because GZIP alone is more optimized,
-            //      but Base64 is easier to test via Postman!
-            if(config.isBase64RequestEnabled() && config.isGzipRequestEnabled())
-            {
-                var bodyText = new String(bodyBytes, StandardCharsets.UTF_8);
-                bodyContent = GzipUtils.decompressBase64ToString(bodyText);
-            }
-            else if (config.isGzipRequestEnabled()) {
-                bodyContent = GzipUtils.decompressToString(bodyBytes);
-            }
-            else {
-                bodyContent = new String(bodyBytes, StandardCharsets.UTF_8);
-            }
-        }
-        return bodyContent;
     }
 }

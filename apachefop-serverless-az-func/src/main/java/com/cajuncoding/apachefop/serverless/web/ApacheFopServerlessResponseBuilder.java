@@ -1,11 +1,12 @@
-package com.cajuncoding.apachefop.serverless.apachefop;
+package com.cajuncoding.apachefop.serverless.web;
 
+import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopRenderResult;
 import com.cajuncoding.apachefop.serverless.utils.GzipUtils;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessHeaders;
 import com.cajuncoding.apachefop.serverless.http.HttpEncodings;
 import com.cajuncoding.apachefop.serverless.http.HttpHeaders;
-import com.cajuncoding.apachefop.serverless.utils.StringUtils;
+import com.cajuncoding.apachefop.serverless.utils.TextUtils;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
@@ -14,20 +15,18 @@ import org.apache.fop.apps.MimeConstants;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Optional;
 
 public class ApacheFopServerlessResponseBuilder<TRequest> {
-    private final SimpleDateFormat dateFormatW3C = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
-    private final String TruncationMarker = " . . . (TRUNCATED!)";
+    public final String TruncationMarker = " . . . (TRUNCATED!)";
 
-    public ApacheFopServerlessResponseBuilder() {
+    private HttpRequestMessage<Optional<TRequest>> request;
+
+    public ApacheFopServerlessResponseBuilder(HttpRequestMessage<Optional<TRequest>> azureFunctionRequest) {
+        this.request = azureFunctionRequest;
     }
 
-    public HttpResponseMessage BuildBadXslFoBodyResponse(
-            HttpRequestMessage<Optional<TRequest>> request
-    ) {
+    public HttpResponseMessage BuildBadXslFoBodyResponse() {
         var response = request
                 .createResponseBuilder(HttpStatus.BAD_REQUEST)
                 .body("A valid XSL-FO body content must be specified.")
@@ -37,7 +36,6 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
     }
 
     public HttpResponseMessage BuildPdfResponse(
-            HttpRequestMessage<Optional<TRequest>> request,
             ApacheFopRenderResult pdfRenderResult,
             ApacheFopServerlessConfig config
     ) throws IOException {
@@ -49,15 +47,14 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 : "Disabled by AzureFunctions 'DebuggingEnabled' configuration Setting.";
 
         //Lets create a unique filename -- because that's helpful to the client...
-        Calendar cal = Calendar.getInstance();
-        String fileName = dateFormatW3C.format(cal.getTime()) + "_RenderedPdf.pdf";
+        String fileName = TextUtils.getCurrentW3cDateTime().concat("_RenderedPdf.pdf");
+
         String contentEncoding = config.isGzipResponseEnabled()
                 ? HttpEncodings.GZIP_ENCODING
                 : HttpEncodings.IDENTITY_ENCODING;
 
-        String eventLogHeaderValue = config.isGzipResponseEnabled()
-                ? GzipUtils.compressToBase64(eventLogText)
-                : eventLogText;
+        //TODO: Dynamically Determine if Header is Gzipped by returning a Class with properties...
+        var eventLogSafeHeaderValue = CreateSafeHeaderValue(eventLogText, config.getMaxHeaderBytesSize());
 
         //Build the Http Response for the Client!
         HttpResponseMessage response = request
@@ -66,8 +63,8 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 .header(HttpHeaders.CONTENT_TYPE, MimeConstants.MIME_PDF)
                 .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(fopPdfBytes.length))
                 .header(HttpHeaders.CONTENT_DISPOSITION, MessageFormat.format("inline; filename=\"{0}\"", fileName))
-                .header(ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_EVENTLOG_ENCODING, contentEncoding)
-                .header(ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_EVENTLOG, eventLogHeaderValue)
+                .header(ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_EVENTLOG_ENCODING, eventLogSafeHeaderValue.getEncoding())
+                .header(ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_EVENTLOG, eventLogSafeHeaderValue.getValue())
                 //If GZIP is enabled then specify the proper encoding in the HttpResponse!
                 .header(HttpHeaders.CONTENT_ENCODING, contentEncoding)
                 .build();
@@ -76,7 +73,6 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
     }
 
     public HttpResponseMessage BuildEventLogDumpResponse(
-            HttpRequestMessage<Optional<TRequest>> request,
             ApacheFopRenderResult pdfRenderResult,
             ApacheFopServerlessConfig config
     ) {
@@ -94,28 +90,33 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
         return response;
     }
 
-    public String CreateSafeHeaderValue(String headerValue, int maxHeaderBytesSize) throws IOException {
+    public SafeHeader CreateSafeHeaderValue(String headerValue, int maxHeaderBytesSize) throws IOException {
+        String resultEncoding = HttpEncodings.IDENTITY_ENCODING;
+        String resultValue = null;
+
         var headerBytes = headerValue.getBytes(StandardCharsets.UTF_8);
         if(headerBytes.length <= maxHeaderBytesSize) {
-            return headerValue;
+            resultValue = headerValue;
         }
         else {
             var compressedValue = GzipUtils.compressToBase64(headerBytes);
             var compressedBytes = compressedValue.getBytes(StandardCharsets.UTF_8);
             if(compressedBytes.length <= maxHeaderBytesSize) {
-                return compressedValue;
+                resultValue = compressedValue;
+                resultEncoding = HttpEncodings.GZIP_ENCODING;
             }
             else {
                 //Safely truncate the value to the specified Byte size...
-                var truncatedValue = StringUtils.truncateToFitUtf8ByteLength(headerValue, maxHeaderBytesSize);
+                var truncatedValue = TextUtils.truncateToFitUtf8ByteLength(headerValue, maxHeaderBytesSize);
                 //Safely overwrite the last set of characters with the Truncation Marker...
                 truncatedValue = truncatedValue
                         .substring(0, truncatedValue.length() - TruncationMarker.length())
                         .concat(truncatedValue);
 
-                return truncatedValue;
+                resultValue = truncatedValue;
             }
         }
 
+        return new SafeHeader(resultValue, resultEncoding);
     }
 }

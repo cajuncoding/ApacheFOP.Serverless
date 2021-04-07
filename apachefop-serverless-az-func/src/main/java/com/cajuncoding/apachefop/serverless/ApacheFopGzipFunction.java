@@ -11,20 +11,20 @@ import java.util.Optional;
 /**
  * Azure Functions with HTTP Trigger.
  */
-public class ApacheFopFunction {
+public class ApacheFopGzipFunction {
     /**
      * This function listens at endpoint "/api/apache-fop/xslfo". Two ways to invoke it using "curl" command in bash:
      */
-    @FunctionName("ApacheFOP")
+    @FunctionName("ApacheFOPGzip")
     public HttpResponseMessage run(
-            @HttpTrigger(name = "req", route="apache-fop/xslfo", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION)
-            HttpRequestMessage<Optional<String>> request,
+            @HttpTrigger(name = "req", route="apache-fop/gzip", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION)
+            HttpRequestMessage<Optional<byte[]>> request,
             final ExecutionContext context
     ) {
         try {
 
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();
-            var response = functionExecutor.ExecuteStringRequest(request, context.getLogger());
+            var response = functionExecutor.ExecuteByteArrayRequest(request, context.getLogger());
 
             return response;
         }

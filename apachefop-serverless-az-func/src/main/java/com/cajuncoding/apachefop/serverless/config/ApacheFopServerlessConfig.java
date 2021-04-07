@@ -6,6 +6,7 @@ import com.microsoft.azure.functions.HttpRequestMessage;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class ApacheFopServerlessConfig<T> {
@@ -20,10 +21,11 @@ public class ApacheFopServerlessConfig<T> {
     private boolean apacheFopLoggingEnabled  = true;
     private boolean isGzipRequestSupported = true;
     private boolean eventLogDumpModeEnabled = false;
+    private int maxHeaderBytesSize = 4096;
 
-    public ApacheFopServerlessConfig(HttpRequestMessage<Optional<T>> request) {
+    public ApacheFopServerlessConfig(Map<String, String> requestHeaders, Map<String, String> requestQueryParams) {
         ReadEnvironmentConfig();
-        ReadRequestConfig(request);
+        ReadRequestHeadersConfig(requestHeaders);
     }
 
     private void ReadEnvironmentConfig() {
@@ -40,9 +42,7 @@ public class ApacheFopServerlessConfig<T> {
         this.isGzipRequestSupported =  getConfigAsBooleanOrDefault("GzipRequestSupportEnabled", true);
     }
 
-    private void ReadRequestConfig(HttpRequestMessage<Optional<T>> request) {
-        var headers = request.getHeaders();
-
+    private void ReadRequestHeadersConfig(Map<String, String> headers) {
         //Determine if the current request Content Encodings specified contain GZIP (as that's all that is currently supported).
         //NOTE: Headers are LowerCased in the returned Map!
         String contentEncodingHeader = headers.getOrDefault(HttpHeaders.CONTENT_ENCODING_LOWERCASE, null);
@@ -54,18 +54,21 @@ public class ApacheFopServerlessConfig<T> {
         String acceptEncodingHeader = headers.getOrDefault(HttpHeaders.ACCEPT_ENCODING_LOWERCASE, null);
         this.isGzipResponseEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
 
-        //Determine if Event Log Dump mode is enabled (vs PDF Binary return).
-        var queryParams = request.getQueryParameters();
-        this.eventLogDumpModeEnabled = BooleanUtils.toBoolean(
-            queryParams.getOrDefault(ApacheFopServerlessQueryParams.EventLogDump, null)
-        );
-
         //Get the Custom ContentType specified for reference
         this.apacheFopServerlessContentType = headers.getOrDefault(
             ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_CONTENT_TYPE_LOWERCASE,
             StringUtils.EMPTY
         );
     }
+
+    private void ReadRequestQueryParamsConfig(Map<String, String> queryParams) {
+        //Determine if Event Log Dump mode is enabled (vs PDF Binary return).
+        this.eventLogDumpModeEnabled = BooleanUtils.toBoolean(
+                queryParams.getOrDefault(ApacheFopServerlessQueryParams.EventLogDump, null)
+        );
+
+    }
+
 
     //****************************************************************
     //Azure Function Configuration Settings...
@@ -81,6 +84,8 @@ public class ApacheFopServerlessConfig<T> {
     public boolean isGzipRequestSupported() { return isGzipRequestSupported; }
 
     public String getApacheFopServerlessContentType() { return apacheFopServerlessContentType; }
+
+    public int getMaxHeaderBytesSize() { return maxHeaderBytesSize; }
 
     //****************************************************************
     //Azure Function Configuration Settings...

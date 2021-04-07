@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- BBernard: XSL-FO as well formed XML must always have a Root Element with FO Namespace defined -->
+<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
+
+    <fo:layout-master-set>
+        <!--Define PORTRAIT PAGE settings -->
+        <fo:simple-page-master master-name="US-Letter-Portrait" page-width="8.5in" page-height="11in" margin-top=".15in" margin-bottom=".15in" margin-left=".15in" margin-right=".15in">
+            <!-- BBernard: The Extent values should match the Margin values of the Body to provide spacing for the Content! -->
+            <fo:region-body margin-top="0in" margin-bottom=".25in" margin-left="0in" margin-right="0in" />
+            <fo:region-before extent="0in" />
+            <fo:region-after extent=".25in" />
+            <fo:region-start extent="0in" />
+            <fo:region-end extent="0in" />
+        </fo:simple-page-master>
+
+        <!-- Define a Page Sequence Master using Layout Master - the Report should Reference Page Sequence master via this Alias -->
+        <fo:page-sequence-master master-name="report-master">
+            <fo:repeatable-page-master-alternatives maximum-repeats="no-limit">
+                <fo:conditional-page-master-reference master-reference="US-Letter-Portrait" page-position="first" />
+                <!--<fo:conditional-page-master-reference master-reference="US-Letter-Portrait" page-position="last" />-->
+                <fo:conditional-page-master-reference master-reference="US-Letter-Portrait" page-position="rest" />
+            </fo:repeatable-page-master-alternatives>
+        </fo:page-sequence-master>
+    </fo:layout-master-set>
+
+    <!-- BBernard: Should reference the Master Sequence Alias here -->
+    <fo:page-sequence master-reference="report-master">
+
+        <fo:flow flow-name="xsl-region-body" font-family="Helvetica" font-size="8.25pt">
+
+            <fo:block margin-top="2in">
+                <fo:leader leader-pattern="rule" leader-length="100%" rule-style="solid" rule-thickness="1.5pt"/>
+            </fo:block>
+
+            <fo:block text-align="center" font-size="15pt" font-weight="bold">ApacheFOP.Serverless . . . Keepin' it Warm!!!</fo:block>
+
+            <fo:block>
+                <fo:leader leader-pattern="rule" leader-length="100%" rule-style="solid" rule-thickness="1.5pt"/>
+            </fo:block>
+        </fo:flow>
+    </fo:page-sequence>
+</fo:root>

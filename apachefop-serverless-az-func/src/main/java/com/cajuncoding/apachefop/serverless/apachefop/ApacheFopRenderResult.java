@@ -1,6 +1,8 @@
 package com.cajuncoding.apachefop.serverless.apachefop;
 
 public class ApacheFopRenderResult {
+    public static final String EventLogSeparator = "||";
+
     private final byte[] pdfBytes;
     private final ApacheFopEventListener eventListener;
 
@@ -27,7 +29,7 @@ public class ApacheFopRenderResult {
     public String getEventsLogAsHeaderValue() {
         //Do NOT include line separators in the Header value,
         //  instead we separate with a valid ASCII Delimiter...
-        String headerValue = getEventListener().GetEventsText("; ");
+        String headerValue = getEventListener().GetEventsText(EventLogSeparator);
         return headerValue;
     }
 }

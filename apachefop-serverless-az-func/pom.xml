@@ -75,14 +75,12 @@
                 <artifactId>azure-functions-maven-plugin</artifactId>
                 <version>1.9.2</version>
                 <configuration>
-                    <!-- The App Name & Resource Group Name must both be Unique or deployment issues may arise
-                            as NOTED here: https://github.com/Azure/azure-functions-java-worker/issues/140 -->
                     <!-- function app name -->
                     <!--suppress UnresolvedMavenProperty -->
-                    <appName>${appBaseName}-${project.build.uuid}</appName>
+                    <appName>${appBaseName}</appName>
                     <!-- function app resource group -->
                     <!--suppress UnresolvedMavenProperty -->
-                    <resourceGroup>java-functions-group-${project.build.uuid}</resourceGroup>
+                    <resourceGroup>java-functions-group</resourceGroup>
                     <!-- function app service plan name -->
                     <appServicePlanName>java-functions-app-service-plan</appServicePlanName>
                     <!-- function app region-->

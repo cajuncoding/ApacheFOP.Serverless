@@ -24,9 +24,9 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)'
 # Create Archive : zip file
 - task: ArchiveFiles@2
-  displayName: 'Archive $(build.artifactstagingdirectory)/apachefop-serverless-az-func/target/azure-functions/$(functionAppMvnTargetFolder)'
+  displayName: 'Archive $(build.artifactstagingdirectory)/apachefop-serverless-az-func/target/azure-functions'
   inputs:
-    rootFolderOrFile: '$(build.artifactstagingdirectory)/apachefop-serverless-az-func/target/azure-functions/$(functionAppMvnTargetFolder)'
+    rootFolderOrFile: '$(build.artifactstagingdirectory)/apachefop-serverless-az-func/target/azure-functions'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'

@@ -108,9 +108,14 @@ Accept-Encoding=gzip
     <img src="/postman-header-enable-gzip.png" style="width:auto;height:auto;max-width:800px;">
 </p>
 
-## Calling the Service from .Net
+## Calling the Service from .Net (ApacheFOP.Serverless REST Client on Nuget):
+Below is a snippet to make a simplified/straightforward call, however _ApacheFOP.Serverless_ has a several other advanced features including compression options and debugging outputs.  So to make things alot easier I've shared a very lightweight REST Client as a .Net Standard 2.0 library that can be used in any .Net project.  It provides options to easily use all of the advanced features and handles debugging details automatically.
 
-### Snippet:
+To easily add support for _ApacheFOP.Serverless_ into your project just add the ready-to-go client libary **availalbe on Nuget here:** [**PdfTemplating.XslFO.Render.ApacheFOP.Serverless Client Library**](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)
+
+Also, I provide additional usage details in my article (mentioned below), but you can jump to the [_ApacheFOP.Serverless_ REST Client details here...](https://cajuncoding.com/2021-08-22-pdf-reporting-with-a-serverless-architecture/#ApacheFopServerlessClient)
+
+### Simplified Snippet:
 Because I talked about follow-through up above, I'd be amiss if I didn't provide a sample implementation of calling this code from .Net.
 
 Assuming the use of the great *RESTSharp library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml)... this sample should get you started on the .Net side as a client calleing the new PDF microservice.
@@ -172,10 +177,6 @@ With the running application provided in the project above, the following page u
 <p align="center">
     <img src="/pdf-templating-apache-fop-serverless-chrome-test.png" style="width:auto;height:auto;max-width:1200px;">
 </p>
-
-And, if you want to easily add support for _ApacheFOP.Serverless_ into your project you can use the ready-to-go client libary -- it's very lightweight REST wrapper with support for the advanced compression properties as well as debugging details.  And it's availalbe on Nuget here: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless Client Library](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)
-
-I provide additional usage details in my article (mentioned below), but you can jump to the [_ApacheFOP.Serverless_ REST Client details here...](https://cajuncoding.com/2021-08-22-pdf-reporting-with-a-serverless-architecture/#ApacheFopServerlessClient)
 
 ## Additional Background:
 For additional details check out my article [**_PDF Reporting with a Serverless Architecture_**](https://cajuncoding.com/2021-08-22-pdf-reporting-with-a-serverless-architecture/), where I provide a broader overview of the background, architecture, and additional details around the _ApacheFOP.Serverless_ project.

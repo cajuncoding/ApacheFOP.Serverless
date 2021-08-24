@@ -158,7 +158,7 @@ namespace PdfTemplating.XslFO.ApacheFOP.Serverless
 ```
 
 ### .Net PdfTemplating (Full blown) Implementation:
-A full blown implementation of templating + ApacheFOP.Serverless is in a branch of my [Pdf Templating project here](https://github.com/cajuncoding/PdfTemplating.XslFO/tree/feature/iniial_support_for_apache_fop_serverless_rendering).
+A full blown demo implementation of templating + ApacheFOP.Serverless, as well as ready-to-go .Net Clients (via Nuget package) can be found in my [Pdf Templating project here](https://github.com/cajuncoding/PdfTemplating.XslFO).
 
 It illustrates the use of both Xslt and/or Razor templates from ASP.Net MVC to render PDF Binary reports dynamically from queries to the [Open Movie Database API](http://www.omdbapi.com/). And it has now been enhanced to also illustrate the use of _ApacehFOP.Serverless_ microservice for rendering instead of the embedded legacy FO.Net implementation.
 
@@ -173,20 +173,11 @@ With the running application provided in the project above, the following page u
     <img src="/pdf-templating-apache-fop-serverless-chrome-test.png" style="width:auto;height:auto;max-width:1200px;">
 </p>
 
+And, if you want to easily add support for _ApacheFOP.Serverless_ into your project you can use the ready-to-go client libary -- it's very lightweight REST wrapper with support for the advanced compression properties as well as debugging details.  And it's availalbe on Nuget here: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless Client Library](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)
+
+I provide additional usage details in my article (mentioned below), but you can jump to the [_ApacheFOP.Serverless_ REST Client details here...](https://cajuncoding.com/2021-08-22-pdf-reporting-with-a-serverless-architecture/#ApacheFopServerlessClient)
 
 ## Additional Background:
-For many-many years, I've implemented Pdf Reporting solutions with [templating approaches](https://github.com/cajuncoding/PdfTemplating.XslFO) for various clients (enterprises & small businesses) to help them automate their paper processes with dynamic generation of _printable media_ outputs such as: PDF files, invoices, shipping/packaging labels, newletters, etc.
-
-And, for a long while now I've known that the current C# implementation FO.Net was limited by the fact that it was created circa 2008 and is now [an archived CodePlex project](https://archive.codeplex.com/?p=fonet).
-
-At one client the technology stack was fully Java based, so the use of _Apache FOP_ was a no-brainer; [ApacheFOP](https://xmlgraphics.apache.org/fop/) is a supported, open-source, full implementation of an XSL-FO processor in Java, that has had regular updates/enhancements over the years. 
-
-The [FO.Net](https://archive.codeplex.com/?p=fonet) C# variant was ported from Apache FOP; likely from a pre-v1.0 version of ApacheFOP, but to be 
-honest it has worked incredibly well, and reliably. As a fully managed C# solution, it ran in web projects as well a WinForms projects where viewing 
-the rendered PDF live int the app real-time provided and wonderful user experience for a couple of projects. 
-
-But, as things have evolved the advent of cloud services has opened doors for accomplishing this in a much more powerful/scaleable/manageable way -- particularly Azure Functions and their excellent support for varios technology languages including: .Net, Java, NodeJS, etc.!
-
-So I finally had the time to flush out the details, and share this project. I truly hope that it helps many others out!
+For additional details check out my article [**_PDF Reporting with a Serverless Architecture_**](https://cajuncoding.com/2021-08-22-pdf-reporting-with-a-serverless-architecture/), where I provide a broader overview of the background, architecture, and additional details around the _ApacheFOP.Serverless_ project.
 
 Now Geaux Code!

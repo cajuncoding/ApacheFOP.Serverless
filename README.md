@@ -122,7 +122,9 @@ Assuming the use of the *RESTSharp library* for REST api calls, and the Xsl-FO c
 
 *NOTE: Just use RESTSharp or Flurl and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
 
-Snippet taken from the [implementation here](https://github.com/cajuncoding/PdfTemplating.XslFO/blob/feature/iniial_support_for_apache_fop_serverless_rendering/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/XslFOPdfRenderService.cs), in the PdfTemplating.XslFO demo project.
+Snippet is a very simplified version taken from the [.Net Client implementation](https://github.com/cajuncoding/PdfTemplating.XslFO/blob/f6f22b09e110954f3ccdde2f53437b0ab1041ccb/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/ApacheFOPServerlessPdfRenderService.cs#L50), in the PdfTemplating.XslFO demo project (mentioned above).
+
+_Note: the `AddRawTextBody()` method is a custom extension that handles some idiosynchrosies of adding raw text for the POST with RESTSharp.... I'll probably be migrating to use [Flurl](https://flurl.dev/) instead in the future._
 
 ```csharp
 using RestSharp;

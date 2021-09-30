@@ -1,5 +1,6 @@
 package com.cajuncoding.apachefop.serverless;
 
+import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopRenderer;
 import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessFunctionExecutor;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
@@ -7,13 +8,14 @@ import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * Azure Functions with HTTP Trigger.
  */
 public class ApacheFopFunction {
     /**
-     * This function listens at endpoint "/api/apache-fop/xslfo". Two ways to invoke it using "curl" command in bash:
+     * This function listens at endpoint "/api/apache-fop/xslfo".
      */
     @FunctionName("ApacheFOP")
     public HttpResponseMessage run(

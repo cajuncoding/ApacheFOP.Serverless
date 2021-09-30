@@ -14,7 +14,15 @@ then I do love-me-some-coffee!*
 </a> 
 
 ## Updates
-Updated the project to v1.1 as it now incorporates the following new updates:
+**Updated the project to v1.2 with the following:**
+ - Added support for Custom Font integration as Resource Files in the project and deployed with the JAR!
+   - This enables adding fonts easily by simply dropping them in the `resources/fonts` folder, and then registering them via configuration in the `apache-fop-config.xml` according to [Apache FOP Font Documentation](https://xmlgraphics.apache.org/fop/2.6/fonts.html#register).
+   - Added a a couple sample (free) custom fonts and sample markup `resources/samples/WorkinWithFontsSampe.fo` in the project.
+ - Fixed bug in the render Event Log debug details returned in the Http Header whereby Apache FOP may send Unicode Characters but only ASCII are allowed; Unicode are now safely escaped into their respective Hex Codes so that the message is readable.
+ - Fixed issue in Maven build to enforce the clean stage so the artifact always contains the latest changes (e.g. especially physical resource file changes) when debugging.
+ - Some miscellaneous code cleanup.
+
+Updated the project to v1.1 as it now incorporates:
  - Upgraded the project to use Java v11 now as the latest long term supported (LTS) version for Azure Functions (aka Zulu Java v11)
    - _Previously was Java 8 (v1.8) (aka Zulu Java v8)._
  - Bumping the versions of all dependencies to the latest stable versions
@@ -97,7 +105,7 @@ Here's the high level steps to get started...
 
 ## Additional Features:
 
-#### GZIP Compression:
+### GZIP Compression:
 In addition to rendering the PDF, this service already implements GZIP compression for returning the Binary PDF files. This can greatly improve performance and download times, especially for PDFs rendered without much imagery, as the text content bytes tends to be more compressible.
 
 All you need to do is add the `Accept-Encoding` header with a value of `gzip` to the request:
@@ -107,6 +115,45 @@ Accept-Encoding=gzip
 <p align="center">
     <img src="/postman-header-enable-gzip.png" style="width:auto;height:auto;max-width:800px;">
 </p>
+
+### Custom Fonts via Resource Files:
+##### Add Font Files (*.ttf, *.otf, etc.)
+To easily utilize custom fonts with the Azure Functions deployment, this project provides the ability to simply add them into the project as resource
+files by simply placing them in the `src/main/resources/fonts` folder.  So you can literally just copy them into the project and deploy. In IntelliJ IDEA the structure will look like:
+<p align="center">
+    <img src="/intellij-resources-fonts-project-structure.png" style="width:auto;height:auto;max-width:500px;">
+</p>
+
+Once there they can be resolved at runtime by the application even after being deployed to Azure Functions; because they will be embedded resources with the JAR file. ApacheFOP.Serverless has a custom `ResourceResolver` implementation that can then locate these via relative path is used when registering the fonts via configuration in the `apache-fop-config.xml` according to [Apache FOP Font Documentation](https://xmlgraphics.apache.org/fop/2.6/fonts.html#register).
+
+##### Register them with Apache FOP Configuration:
+Now we need to register the fonts we've placed into our resources.  We do this by editing the `resources/apache-fop-config.xml` according to [Apache FOP Font Documentation](https://xmlgraphics.apache.org/fop/2.6/fonts.html#register).  The project includes a couple sample fonts as well as a sample Xsl FO markup file that will render using these new custom fonts located at `resources/samples/WorkinWithFontsSample.fo`.
+
+The font registration configuration looks like this:
+```
+<fop version="1.0">
+  . . . 
+  <renderers>
+    <renderer mime="application/pdf">
+      . . . 
+      
+      <fonts>
+        <!-- Automatically detect operating system installed fonts; More Details Here: https://xmlgraphics.apache.org/fop/2.6/fonts.html -->
+        <auto-detect/>
+
+        <font embed-url="fonts/Minisystem.ttf" simulate-style="true">
+            <font-triplet name="Minisystem" style="normal" weight="normal" />
+        </font>
+        <font embed-url="fonts/PixelWow.otf" simulate-style="true">
+            <font-triplet name="PixelWow" style="normal" weight="normal" />
+        </font>
+    </fonts>
+    . . . 
+    </renderer>
+  </renderers>
+</fop>
+```
+
 
 ## Calling the Service from .Net
 

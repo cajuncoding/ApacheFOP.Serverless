@@ -1,5 +1,6 @@
 package com.cajuncoding.apachefop.serverless.apachefop;
 
+import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConstants;
 import org.apache.fop.apps.*;
 import org.apache.fop.configuration.ConfigurationException;
@@ -14,6 +15,9 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 public class ApacheFopRenderer {
+    //Provide Dynamic resolution of Resources (e.g. Fonts) from JAR Resource Files...
+    private static final ApacheFopJavaResourcesFileResolver fopResourcesFileResolver = new ApacheFopJavaResourcesFileResolver();
+
     //FOPFactory is expected to be re-used as noted in Apache 'overview' section here:
     //  https://xmlgraphics.apache.org/fop/1.1/embedding.html
     private static final FopFactory fopFactory = createApacheFopFactory();
@@ -22,9 +26,10 @@ public class ApacheFopRenderer {
     private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
     private Logger logger = null;
+    private ApacheFopServerlessConfig apacheFopConfig = null;
 
     public ApacheFopRenderer() {
-        this.logger = null;
+        this(null);
     }
 
     public ApacheFopRenderer(Logger optionalLogger) {
@@ -85,7 +90,8 @@ public class ApacheFopRenderer {
                 //Attempt to initialize with Configuration loaded from Configuration XML Resource file...
                 var cfgBuilder = new DefaultConfigurationBuilder();
                 var cfg = cfgBuilder.build(configStream);
-                var fopFactoryBuilder = new FopFactoryBuilder(baseUri).setConfiguration(cfg);
+
+                var fopFactoryBuilder = new FopFactoryBuilder(baseUri, fopResourcesFileResolver).setConfiguration(cfg);
 
                 fopFactory = fopFactoryBuilder.build();
             }

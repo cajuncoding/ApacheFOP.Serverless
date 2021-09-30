@@ -13,16 +13,23 @@ then I do love-me-some-coffee!*
 <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174">
 </a> 
 
-## Updates
-**Updated the project to v1.2 with the following:**
+## Updates / Change Log
+##### Updated the project to v1.3 with the following:
+ - Added support for Azure Function configuration capability to enable Accessibility since Apache FOP `<accessibility>` xml config element is not working as of v2.6.
+   - Added an XslFO markup sample to test/demonstrate Accessibility in `resources/samples/WorkinWithAccessibilitySample.fo`.
+   - Updated KeepinItWarm.fo to run correctly when Accessibility is enabled.
+ - Added in-memory caching of Java embedded resources that are resolved (e.g. Fonts) for performance.
+ - Code cleanup.
+
+##### Updated the project to v1.2 with the following:
  - Added support for Custom Font integration as Resource Files in the project and deployed with the JAR!
    - This enables adding fonts easily by simply dropping them in the `resources/fonts` folder, and then registering them via configuration in the `apache-fop-config.xml` according to [Apache FOP Font Documentation](https://xmlgraphics.apache.org/fop/2.6/fonts.html#register).
-   - Added a a couple sample (free) custom fonts and sample markup `resources/samples/WorkinWithFontsSampe.fo` in the project.
+   - Added a a couple sample (free) custom fonts and sample markup `resources/samples/WorkinWithFontsSample.fo` in the project.
  - Fixed bug in the render Event Log debug details returned in the Http Header whereby Apache FOP may send Unicode Characters but only ASCII are allowed; Unicode are now safely escaped into their respective Hex Codes so that the message is readable.
  - Fixed issue in Maven build to enforce the clean stage so the artifact always contains the latest changes (e.g. especially physical resource file changes) when debugging.
  - Some miscellaneous code cleanup.
 
-Updated the project to v1.1 as it now incorporates:
+##### Updated the project to v1.1 as it now incorporates:
  - Upgraded the project to use Java v11 now as the latest long term supported (LTS) version for Azure Functions (aka Zulu Java v11)
    - _Previously was Java 8 (v1.8) (aka Zulu Java v8)._
  - Bumping the versions of all dependencies to the latest stable versions
@@ -69,7 +76,7 @@ I ramble on about that over here in:
 
 Suffice it to say that markup based solutions have alot of value, and Xsl-FO is still one of the best ways to maintain strong software development practices by rendering PDF outputs (as a presentation output) from separated content/data + template. And Xsl-FO offers features that some approaches just can't do (looking at you *Crystal Reports*).
 
-There has been a fully managed .Net C# port of [Apache FOP](https://xmlgraphics.apache.org/fop/) (FO.Net) based on a pre-v1.0 version (*is my guesstimate*); it's old & unsupported, but still fairly functional, and I've used it very successfully on several projects. But Apache FOP is now on [v2.6 as of Jan 2021!](https://xmlgraphics.apache.org/fop/2.6/changes_2.6.html) with annual/bi-annual support updates still being released.
+There has been a fully managed .Net C# port of [Apache FOP](https://xmlgraphics.apache.org/fop/) (FO.Net) based on a pre-v1.0 version (*is my guesstimate*); it's old & unsupported, but still fairly functional, and I've used it very successfully on several projects. But Apache FOP is now on [v2.5 as of May 2020!](https://xmlgraphics.apache.org/fop/2.5/changes_2.5.html) with annual/bi-annual support updates still being released.
 
 So my goal has been, for a while, to take advantage of the many great innovations in the past several years to provide an interoperable integration between Java Apache FOP and .Net, without resorting to [something that makes my eyes cross (ugg).](http://codemesh.com/products/juggernet/).
 
@@ -126,52 +133,21 @@ files by simply placing them in the `src/main/resources/fonts` folder.  So you c
 
 Once there they can be resolved at runtime by the application even after being deployed to Azure Functions; because they will be embedded resources with the JAR file. ApacheFOP.Serverless has a custom `ResourceResolver` implementation that can then locate these via relative path is used when registering the fonts via configuration in the `apache-fop-config.xml` according to [Apache FOP Font Documentation](https://xmlgraphics.apache.org/fop/2.6/fonts.html#register).
 
-##### Register them with Apache FOP Configuration:
-Now we need to register the fonts we've placed into our resources.  We do this by editing the `resources/apache-fop-config.xml` according to [Apache FOP Font Documentation](https://xmlgraphics.apache.org/fop/2.6/fonts.html#register).  The project includes a couple sample fonts as well as a sample Xsl FO markup file that will render using these new custom fonts located at `resources/samples/WorkinWithFontsSample.fo`.
+### Enable Accessibility:
+Apache FOP Supports accessibility compliance in PDFs however, the `<accessibility>` xml configuration attribute noted in the documentation ([here](https://xmlgraphics.apache.org/fop/2.6/accessibility.html)) does not work as of v2.6. 
 
-The font registration configuration looks like this:
-```
-<fop version="1.0">
-  . . . 
-  <renderers>
-    <renderer mime="application/pdf">
-      . . . 
-      
-      <fonts>
-        <!-- Automatically detect operating system installed fonts; More Details Here: https://xmlgraphics.apache.org/fop/2.6/fonts.html -->
-        <auto-detect/>
+Therefore ApacheFOP.Serverless provides an Azure Function configuration value to set this directly which can be enabled by setting the Azure Functions environment config value: `'AccessibilityEnabled' = 'true'`.
 
-        <font embed-url="fonts/Minisystem.ttf" simulate-style="true">
-            <font-triplet name="Minisystem" style="normal" weight="normal" />
-        </font>
-        <font embed-url="fonts/PixelWow.otf" simulate-style="true">
-            <font-triplet name="PixelWow" style="normal" weight="normal" />
-        </font>
-    </fonts>
-    . . . 
-    </renderer>
-  </renderers>
-</fop>
-```
+## Calling the Service from .Net
 
-
-## Calling the Service from .Net (ApacheFOP.Serverless REST Client on Nuget):
-Below is a snippet to make a simplified/straightforward call, however _ApacheFOP.Serverless_ has a several other advanced features including compression options and debugging outputs.  So to make things alot easier I've shared a very lightweight REST Client as a .Net Standard 2.0 library that can be used in any .Net project.  It provides options to easily use all of the advanced features and handles debugging details automatically.
-
-To easily add support for _ApacheFOP.Serverless_ into your project just add the ready-to-go client libary **availalbe on Nuget here:** [**PdfTemplating.XslFO.Render.ApacheFOP.Serverless Client Library**](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)
-
-Also, I provide additional usage details in my article (mentioned below), but you can jump to the [_ApacheFOP.Serverless_ REST Client details here...](https://cajuncoding.com/2021-08-22-pdf-reporting-with-a-serverless-architecture/#ApacheFopServerlessClient)
-
-### Simplified Snippet:
+### Snippet:
 Because I talked about follow-through up above, I'd be amiss if I didn't provide a sample implementation of calling this code from .Net.
 
-Assuming the use of the *RESTSharp library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml)... this sample should get you started on the .Net side as a client calleing the new PDF microservice.
+Assuming the use of the great *RESTSharp library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml)... this sample should get you started on the .Net side as a client calleing the new PDF microservice.
 
-*NOTE: Just use RESTSharp or Flurl and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
+*NOTE: Just use RESTSharp and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
 
-Snippet is a very simplified version taken from the [.Net Client implementation](https://github.com/cajuncoding/PdfTemplating.XslFO/blob/f6f22b09e110954f3ccdde2f53437b0ab1041ccb/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/ApacheFOPServerlessPdfRenderService.cs#L50), in the PdfTemplating.XslFO demo project (mentioned above).
-
-_Note: the `AddRawTextBody()` method is a custom extension that handles some idiosynchrosies of adding raw text for the POST with RESTSharp.... I'll probably be migrating to use [Flurl](https://flurl.dev/) instead in the future._
+Snippet taken from the [implementation here](https://github.com/cajuncoding/PdfTemplating.XslFO/blob/feature/iniial_support_for_apache_fop_serverless_rendering/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/XslFOPdfRenderService.cs), in my PdfTemplating project.
 
 ```csharp
 using RestSharp;
@@ -212,7 +188,7 @@ namespace PdfTemplating.XslFO.ApacheFOP.Serverless
 ```
 
 ### .Net PdfTemplating (Full blown) Implementation:
-A full blown demo implementation of templating + ApacheFOP.Serverless, as well as ready-to-go .Net Clients (via Nuget package) can be found in my [Pdf Templating project here](https://github.com/cajuncoding/PdfTemplating.XslFO).
+A full blown implementation of templating + ApacheFOP.Serverless is in a branch of my [Pdf Templating project here](https://github.com/cajuncoding/PdfTemplating.XslFO/tree/feature/iniial_support_for_apache_fop_serverless_rendering).
 
 It illustrates the use of both Xslt and/or Razor templates from ASP.Net MVC to render PDF Binary reports dynamically from queries to the [Open Movie Database API](http://www.omdbapi.com/). And it has now been enhanced to also illustrate the use of _ApacehFOP.Serverless_ microservice for rendering instead of the embedded legacy FO.Net implementation.
 
@@ -227,7 +203,20 @@ With the running application provided in the project above, the following page u
     <img src="/pdf-templating-apache-fop-serverless-chrome-test.png" style="width:auto;height:auto;max-width:1200px;">
 </p>
 
+
 ## Additional Background:
-For additional details check out my article [**_PDF Reporting with a Serverless Architecture_**](https://cajuncoding.com/2021-08-22-pdf-reporting-with-a-serverless-architecture/), where I provide a broader overview of the background, architecture, and additional details around the _ApacheFOP.Serverless_ project.
+For many-many years, I've implemented Pdf Reporting solutions with [templating approaches](https://github.com/cajuncoding/PdfTemplating.XslFO) for various clients (enterprises & small businesses) to help them automate their paper processes with dynamic generation of _printable media_ outputs such as: PDF files, invoices, shipping/packaging labels, newletters, etc.
+
+And, for a long while now I've known that the current C# implementation FO.Net was limited by the fact that it was created circa 2008 and is now [an archived CodePlex project](https://archive.codeplex.com/?p=fonet).
+
+At one client the technology stack was fully Java based, so the use of _Apache FOP_ was a no-brainer; [ApacheFOP](https://xmlgraphics.apache.org/fop/) is a supported, open-source, full implementation of an XSL-FO processor in Java, that has had regular updates/enhancements over the years. 
+
+The [FO.Net](https://archive.codeplex.com/?p=fonet) C# variant was ported from Apache FOP; likely from a pre-v1.0 version of ApacheFOP, but to be 
+honest it has worked incredibly well, and reliably. As a fully managed C# solution, it ran in web projects as well a WinForms projects where viewing 
+the rendered PDF live int the app real-time provided and wonderful user experience for a couple of projects. 
+
+But, as things have evolved the advent of cloud services has opened doors for accomplishing this in a much more powerful/scaleable/manageable way -- particularly Azure Functions and their excellent support for varios technology languages including: .Net, Java, NodeJS, etc.!
+
+So I finally had the time to flush out the details, and share this project. I truly hope that it helps many others out!
 
 Now Geaux Code!

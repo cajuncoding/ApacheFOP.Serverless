@@ -5,6 +5,12 @@
     <!-- Strict FO validation -->
     <!-- <strict-validation>true</strict-validation>-->
 
+    <!-- NOTE: As of ApacheFOP 2.6 this does NOT actually work, despite being mentioned in the
+            Documentation here: https://xmlgraphics.apache.org/fop/2.6/accessibility.html;
+            Use the ApacheFOP.Serverless environment config option 'AccessibilityEnabled' instead!
+            Example in Azure Functions Environment Config: 'AccessibilityEnabled' = 'true' -->
+    <!--<accessibility>true</accessibility>-->
+
     <!-- Base URL for resolving relative URLs -->
     <base>./</base>
     <!-- Source resolution in dpi (dots/pixels per inch) for determining the size of pixels in SVG and bitmap images, default: 72dpi -->
@@ -19,6 +25,11 @@
 
     <renderers>
         <renderer mime="application/pdf">
+            <!-- Enable this to turn on Accessibility Support...
+                 For more Info See: https://xmlgraphics.apache.org/fop/2.6/pdfa.html -->
+            <!-- <pdf-ua-mode>PDF/UA-1</pdf-ua-mode> -->
+            <!-- <version>1.4</version>-->
+
             <filterList>
                 <!-- provides compression using zlib flate (default is on) -->
                 <value>flate</value>

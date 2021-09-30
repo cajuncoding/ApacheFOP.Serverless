@@ -2,6 +2,7 @@ package com.cajuncoding.apachefop.serverless.apachefop;
 
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConstants;
+import com.cajuncoding.apachefop.serverless.utils.ResourceUtils;
 import org.apache.fop.apps.*;
 import org.apache.fop.configuration.ConfigurationException;
 import org.apache.fop.configuration.DefaultConfigurationBuilder;
@@ -20,7 +21,8 @@ public class ApacheFopRenderer {
 
     //FOPFactory is expected to be re-used as noted in Apache 'overview' section here:
     //  https://xmlgraphics.apache.org/fop/1.1/embedding.html
-    private static final FopFactory fopFactory = createApacheFopFactory();
+    private static FopFactory fopFactory = null;
+
     //TransformerFactory may be re-used as a singleton as long as it's never mutated/modified directly by
     //  more than one thread (e.g. configuration changes on the Factory class).
     private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -28,12 +30,18 @@ public class ApacheFopRenderer {
     private Logger logger = null;
     private ApacheFopServerlessConfig apacheFopConfig = null;
 
-    public ApacheFopRenderer() {
-        this(null);
+    public ApacheFopRenderer(ApacheFopServerlessConfig config) {
+        this(config,null);
     }
 
-    public ApacheFopRenderer(Logger optionalLogger) {
+    public ApacheFopRenderer(ApacheFopServerlessConfig config, Logger optionalLogger) {
+        if(config == null) throw new IllegalArgumentException("Failed to initialize ApacheFOPRenderer class; the ApacheFOPServerlessConfig is null.");
+        this.apacheFopConfig = config;
         this.logger = optionalLogger;
+
+        //Safely initialize the Apache FOP Renderer as a lazy-loaded Singleton (with thread-safety)...
+        //NOTE: We now lazy-initialize so that we can use Configuration during initialization!
+        initApacheFopFactorySafely();
     }
 
     public ApacheFopRenderResult renderPdfResult(String xslFOSource, boolean gzipEnabled) throws IOException, TransformerException, FOPException {
@@ -79,51 +87,53 @@ public class ApacheFopRenderer {
         }
     }
 
-    public static FopFactory createApacheFopFactory() {
-        var classLoader = ApacheFopRenderer.class.getClassLoader();
-        var baseUri = new File(".").toURI();
-        var configFilePath = ApacheFopServerlessConstants.ConfigXmlResourceName;
-        FopFactory fopFactory = null;
+    protected synchronized void initApacheFopFactorySafely() {
+        if(this.fopFactory == null) {
+            var baseUri = new File(".").toURI();
+            var configFilePath = ApacheFopServerlessConstants.ConfigXmlResourceName;
+            FopFactory newFopFactory = null;
 
-        try(var configStream = classLoader.getResourceAsStream(configFilePath);) {
-            if(configStream != null) {
-                //Attempt to initialize with Configuration loaded from Configuration XML Resource file...
-                var cfgBuilder = new DefaultConfigurationBuilder();
-                var cfg = cfgBuilder.build(configStream);
+            try (var configStream = ResourceUtils.loadResourceAsStream(configFilePath);) {
+                if (configStream != null) {
 
-                var fopFactoryBuilder = new FopFactoryBuilder(baseUri, fopResourcesFileResolver).setConfiguration(cfg);
+                    //When Debugging log the full Configuration file...
+                    if(this.apacheFopConfig.isDebuggingEnabled()) {
+                        var configFileXmlText =ResourceUtils.loadResourceAsString(configFilePath);
+                        LogMessage("[DEBUG] ApacheFOP Configuration Xml:".concat(System.lineSeparator()).concat(configFileXmlText));
+                    }
 
-                fopFactory = fopFactoryBuilder.build();
+                    //Attempt to initialize with Configuration loaded from Configuration XML Resource file...
+                    var cfgBuilder = new DefaultConfigurationBuilder();
+                    var cfg = cfgBuilder.build(configStream);
+
+                    var fopFactoryBuilder = new FopFactoryBuilder(baseUri, fopResourcesFileResolver).setConfiguration(cfg);
+
+                    //Ensure Accessibility is programmatically set (default configuration is false)...
+                    //fopFactoryBuilder.setAccessibility(this.apacheFopConfig.isAccessibilityPdfRenderingEnabled());
+
+                    newFopFactory = fopFactoryBuilder.build();
+                }
+            } catch (IOException | ConfigurationException e) {
+                //DO NOTHING if Configuration is Invalid; log info. for troubleshooting.
+                System.out.println(MessageFormat.format(
+                        "An Exception occurred loading the Configuration file [{0}]; {1}",
+                        configFilePath,
+                        e.getMessage()
+                ));
             }
-        }
-        catch (IOException | ConfigurationException e) {
-            //DO NOTHING if Configuration is Invalid; log info. for troubleshooting.
-            System.out.println(MessageFormat.format(
-         "An Exception occurred loading the Configuration file [{0}]; {1}",
-                configFilePath,
-                e.getMessage()
-            ));
-        }
 
-        //Safely Initialize will All DEFAULTS if not loaded with Configuration...
-        if(fopFactory == null) {
-            fopFactory = FopFactory.newInstance(baseUri);
-        }
+            //Safely Initialize will All DEFAULTS if not loaded with Configuration...
+            if (newFopFactory == null) {
+                newFopFactory = FopFactory.newInstance(baseUri);
+            }
 
-        return fopFactory;
+            this.fopFactory = newFopFactory;
+        }
     }
 
-//    public static String getApacheFopConfigXmlText() {
-//        ClassLoader classLoader = ApacheFOPHelper.class.getClassLoader();
-//        try(var resourceStream = classLoader.getResourceAsStream("apache-fop-config.xml");) {
-//
-//            return (resourceStream != null)
-//                ? IOUtils.toString(resourceStream, StandardCharsets.UTF_8)
-//                : null;
-//
-//        } catch (IOException e) {
-//            return null;
-//        }
-//    }
-
+    protected void LogMessage(String message)
+    {
+        if(logger != null)
+            logger.info(message);
+    }
 }

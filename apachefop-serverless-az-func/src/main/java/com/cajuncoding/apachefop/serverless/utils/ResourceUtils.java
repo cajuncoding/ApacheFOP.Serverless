@@ -1,7 +1,5 @@
 package com.cajuncoding.apachefop.serverless.utils;
 
-import com.cajuncoding.apachefop.serverless.KeepWarmFunction;
-import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConstants;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -12,12 +10,12 @@ import java.nio.file.Paths;
 
 public class ResourceUtils {
 
-    public static String LoadResourceAsString(String resource) throws IOException {
-        return LoadResourceAsString(resource, GetClassLoader());
+    public static String loadResourceAsString(String resource) throws IOException {
+        return loadResourceAsString(resource, getClassLoader());
     }
 
-    public static String LoadResourceAsString(String resource, ClassLoader resourceClassLoader) throws IOException {
-        var sanitizedResource = SanitizeResourcePath(resource);
+    public static String loadResourceAsString(String resource, ClassLoader resourceClassLoader) throws IOException {
+        var sanitizedResource = sanitizeResourcePath(resource);
 
         try (var resourceStream = resourceClassLoader.getResourceAsStream(sanitizedResource);) {
             var resourceText = IOUtils.toString(resourceStream, StandardCharsets.UTF_8);
@@ -25,28 +23,28 @@ public class ResourceUtils {
         }
     }
 
-    public static InputStream LoadResourceAsStream(String resource) {
-        var sanitizedResource = SanitizeResourcePath(resource);
-        var resourceStream = GetClassLoader().getResourceAsStream(sanitizedResource);
+    public static InputStream loadResourceAsStream(String resource) {
+        var sanitizedResource = sanitizeResourcePath(resource);
+        var resourceStream = getClassLoader().getResourceAsStream(sanitizedResource);
         return resourceStream;
     }
 
-    public static Path GetBaseMappedPath() {
+    public static Path getBaseMappedPath() {
         var baseAppPath = Paths.get("").toAbsolutePath();
         return baseAppPath;
     }
 
     public static Path MapServerPath(Path pathToMap) {
-        var basePath = GetBaseMappedPath();
+        var basePath = getBaseMappedPath();
         var relativePath = basePath.relativize(pathToMap);
         return relativePath;
     }
 
-    public static ClassLoader GetClassLoader() {
+    public static ClassLoader getClassLoader() {
         return ResourceUtils.class.getClassLoader();
     }
 
-    public static String SanitizeResourcePath(String resource) {
+    public static String sanitizeResourcePath(String resource) {
         var trimmed = resource.trim();
         var slashCorrected = trimmed.indexOf('\\') < 0 ? trimmed : trimmed.replace('\\', '/');
         return slashCorrected;

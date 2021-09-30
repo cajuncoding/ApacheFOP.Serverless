@@ -18,7 +18,7 @@ public class TextUtils {
         return currentW3cDateTime;
     }
 
-    public static boolean IsNullOrWhiteSpace(String value) {
+    public static boolean isNullOrWhiteSpace(String value) {
         return value == null || value.isBlank();
     }
 

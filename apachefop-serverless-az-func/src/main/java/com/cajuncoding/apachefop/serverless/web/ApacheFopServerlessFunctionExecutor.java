@@ -1,7 +1,6 @@
 package com.cajuncoding.apachefop.serverless.web;
 
 import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopRenderer;
-import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessResponseBuilder;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.cajuncoding.apachefop.serverless.utils.AzureFunctionUtils;
 import com.microsoft.azure.functions.HttpRequestMessage;
@@ -63,7 +62,7 @@ public class ApacheFopServerlessFunctionExecutor {
         return ExecuteRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
     }
 
-    private HttpResponseMessage ExecuteRequestInternal(
+    protected HttpResponseMessage ExecuteRequestInternal(
             String xslFOBodyContent,
             ApacheFopServerlessConfig config,
             ApacheFopServerlessResponseBuilder responseBuilder,
@@ -87,8 +86,8 @@ public class ApacheFopServerlessFunctionExecutor {
         //Initialize the ApacheFopRenderer (potentially optimized with less logging.
         //NOTE: If used, the Logger must be the instance injected into the Azure Function!
         ApacheFopRenderer fopHelper = config.isApacheFopLoggingEnabled()
-                ? new ApacheFopRenderer(logger)
-                : new ApacheFopRenderer();
+                ? new ApacheFopRenderer(config, logger)
+                : new ApacheFopRenderer(config);
 
         //Execute the transformation of the XSL-FO source content to Binary PDF format...
         var pdfRenderResult = fopHelper.renderPdfResult(xslFOBodyContent, config.isGzipResponseEnabled());

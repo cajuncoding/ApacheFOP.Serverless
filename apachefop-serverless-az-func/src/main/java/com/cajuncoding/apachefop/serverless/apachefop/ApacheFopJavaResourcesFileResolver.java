@@ -41,7 +41,7 @@ public class ApacheFopJavaResourcesFileResolver implements ResourceResolver {
 
     @Override
     public OutputStream getOutputStream(URI uri) throws IOException {
-        //For Output Streams we simply default to original Apache FOP behaviour using the original default Fop Resource Resolver...
+        //For Output Streams we simply default to original Apache FOP behavior using the original default Fop Resource Resolver...
         return defaultFopResolver.getOutputStream(uri);
 
         //return ResourceUtils.GetClassLoader()

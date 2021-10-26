@@ -38,7 +38,8 @@ public class ResourceUtils {
         var basePath = getBaseMappedPath();
         
         //Guard to ensure that the path is something inside of the current Base Path, 
-        //  otherwise relativize() will throw Exceptions.
+        //  otherwise path.relativize() will throw Exceptions.
+        //NOTE: the Path.startsWith() will be provide a safe/case-insensitive test...
         if(!pathToMap.startsWith(basePath))
             return null;
 

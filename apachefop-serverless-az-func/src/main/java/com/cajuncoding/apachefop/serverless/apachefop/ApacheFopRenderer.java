@@ -21,7 +21,7 @@ public class ApacheFopRenderer {
 
     //FOPFactory is expected to be re-used as noted in Apache 'overview' section here:
     //  https://xmlgraphics.apache.org/fop/1.1/embedding.html
-    private static FopFactory fopFactory = null;
+    private static FopFactory staticFopFactory = null;
 
     //TransformerFactory may be re-used as a singleton as long as it's never mutated/modified directly by
     //  more than one thread (e.g. configuration changes on the Factory class).
@@ -54,7 +54,7 @@ public class ApacheFopRenderer {
         ) {
             //Enable the Event Listener for capturing Logging details (e.g. parsing/processing Events)...
             var eventListener = new ApacheFopEventListener(logger);
-            FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
+            FOUserAgent foUserAgent = staticFopFactory.newFOUserAgent();
             foUserAgent.getEventBroadcaster().addEventListener(eventListener);
 
             //In order to transform the input source into the Binary Pdf output we must initialize a new
@@ -64,7 +64,7 @@ public class ApacheFopRenderer {
             //          Fop is just processing events as they are raised by the transformer.  This is efficient
             //          because the Xml tree is only processed 1 time which aids in optimizing both performance
             //          and memory utilization.
-            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, fopOutputStream);
+            Fop fop = staticFopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, fopOutputStream);
             Transformer transformer = transformerFactory.newTransformer();
 
             try(StringReader stringReader = new StringReader(xslFOSource)) {
@@ -88,7 +88,7 @@ public class ApacheFopRenderer {
     }
 
     protected synchronized void initApacheFopFactorySafely() {
-        if(this.fopFactory == null) {
+        if(staticFopFactory == null) {
             var baseUri = new File(".").toURI();
             var configFilePath = ApacheFopServerlessConstants.ConfigXmlResourceName;
             FopFactory newFopFactory = null;
@@ -127,7 +127,7 @@ public class ApacheFopRenderer {
                 newFopFactory = FopFactory.newInstance(baseUri);
             }
 
-            this.fopFactory = newFopFactory;
+            staticFopFactory = newFopFactory;
         }
     }
 

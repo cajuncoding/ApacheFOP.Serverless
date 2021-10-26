@@ -53,7 +53,6 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 ? HttpEncodings.GZIP_ENCODING
                 : HttpEncodings.IDENTITY_ENCODING;
 
-        //TODO: Dynamically Determine if Header is Gzipped by returning a Class with properties...
         var eventLogSafeHeaderValue = CreateSafeHeaderValue(eventLogText, config.getMaxHeaderBytesSize());
 
         //Build the Http Response for the Client!

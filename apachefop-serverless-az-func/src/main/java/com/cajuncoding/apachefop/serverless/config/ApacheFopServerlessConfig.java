@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
-public class ApacheFopServerlessConfig<T> {
+public class ApacheFopServerlessConfig {
     //Request Configuration Parameters...
     private boolean isGzipRequestEnabled = false;
     private boolean isGzipResponseEnabled = false;
@@ -131,12 +131,12 @@ public class ApacheFopServerlessConfig<T> {
         return value;
     }
 
-    private String getConfigValueOrDefault(String name, String defaultValue) {
-        String value = getConfigValue(name);
-        return StringUtils.isBlank(value)
-            ? defaultValue
-            : value;
-    }
+    // private String getConfigValueOrDefault(String name, String defaultValue) {
+    //     String value = getConfigValue(name);
+    //     return StringUtils.isBlank(value)
+    //         ? defaultValue
+    //         : value;
+    // }
 
     private boolean getConfigAsBooleanOrDefault(String name, boolean defaultValue) {
         String value = getConfigValue(name);

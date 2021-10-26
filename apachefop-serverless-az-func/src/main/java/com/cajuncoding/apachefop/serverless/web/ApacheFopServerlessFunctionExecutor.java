@@ -28,7 +28,7 @@ public class ApacheFopServerlessFunctionExecutor {
         var config = new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
 
         //Create the Response Builder to handle the various responses we support.
-        var responseBuilder = new ApacheFopServerlessResponseBuilder(request);
+        var responseBuilder = new ApacheFopServerlessResponseBuilder<byte[]>(request);
 
         //Get the XslFO Source from the Request (handling GZip Payloads if specified)...
         var xslFOBodyContent = request.getBody().isPresent()
@@ -50,7 +50,7 @@ public class ApacheFopServerlessFunctionExecutor {
         var config = new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
 
         //Create the Response Builder to handle the various responses we support.
-        var responseBuilder = new ApacheFopServerlessResponseBuilder(request);
+        var responseBuilder = new ApacheFopServerlessResponseBuilder<String>(request);
 
         //Get the XslFO Source from the Request (handling GZip Payloads if specified)...
         var xslFOBodyContent = request.getBody().isPresent()
@@ -62,10 +62,10 @@ public class ApacheFopServerlessFunctionExecutor {
         return ExecuteRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
     }
 
-    protected HttpResponseMessage ExecuteRequestInternal(
+    protected <TRequest> HttpResponseMessage ExecuteRequestInternal(
             String xslFOBodyContent,
             ApacheFopServerlessConfig config,
-            ApacheFopServerlessResponseBuilder responseBuilder,
+            ApacheFopServerlessResponseBuilder<TRequest> responseBuilder,
             Logger logger
     ) throws TransformerException, IOException, FOPException {
         if (StringUtils.isBlank(xslFOBodyContent)) {

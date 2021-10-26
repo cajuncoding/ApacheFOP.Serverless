@@ -28,6 +28,19 @@
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>fop</artifactId>
             <version>2.6</version>
+            <!-- We MUST explicitly exclude these to ensure VS Code can correctly compile.
+                NOTE: This is because they are referenced in from multiple libraries and while 
+                      Maven (via IntelliJ) resolves it, VS Code  Java Extensions will fail to compile -->
+            <exclusions>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>java.xml</groupId>
+                    <artifactId>java.xml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -81,16 +94,18 @@
             <plugin>
                 <groupId>com.microsoft.azure</groupId>
                 <artifactId>azure-functions-maven-plugin</artifactId>
-                <version>1.9.2</version>
+                <version>1.14.0</version>
                 <configuration>
                     <!-- The App Name & Resource Group Name must both be Unique or deployment issues may arise
                             as NOTED here: https://github.com/Azure/azure-functions-java-worker/issues/140 -->
                     <!-- function app name -->
                     <!--suppress UnresolvedMavenProperty -->
-                    <appName>${appBaseName}-${project.build.uuid}</appName>
+                    <!-- <appName>${appBaseName}-${project.build.uuid}</appName> -->
+                    <appName>${appBaseName}</appName>
                     <!-- function app resource group -->
                     <!--suppress UnresolvedMavenProperty -->
-                    <resourceGroup>java-functions-group-${project.build.uuid}</resourceGroup>
+                    <!-- <resourceGroup>java-functions-group-${project.build.uuid}</resourceGroup> -->
+                    <resourceGroup>java-functions-group</resourceGroup>
                     <!-- function app service plan name -->
                     <appServicePlanName>java-functions-app-service-plan</appServicePlanName>
                     <!-- function app region-->
@@ -107,10 +122,6 @@
                         <!-- runtime os, could be windows, linux or docker-->
                         <os>windows</os>
                         <javaVersion>${java.version}</javaVersion>
-                        <!-- for docker function, please set the following parameters -->
-                        <!-- <image>[hub-user/]repo-name[:tag]</image> -->
-                        <!-- <serverId></serverId> -->
-                        <!-- <registryUrl></registryUrl>  -->
                     </runtime>
                     <appSettings>
                         <property>

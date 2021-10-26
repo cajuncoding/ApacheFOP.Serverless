@@ -1,0 +1,9 @@
+{
+    "azureFunctions.deploySubpath": "target/azure-functions/apachefop-serverless-az-func",
+    "azureFunctions.projectLanguage": "Java",
+    "azureFunctions.projectRuntime": "~3",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "package (functions)",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "maven.view": "flat"
+}

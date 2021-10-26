@@ -161,6 +161,23 @@ Apache FOP Supports accessibility compliance in PDFs however, the `<accessibilit
 
 Therefore ApacheFOP.Serverless provides an Azure Function configuration value to set this directly which can be enabled by setting the Azure Functions environment config value: `'AccessibilityEnabled' = 'true'`.
 
+## Basic Azure Functions Configuration Values:
+Ensure that the configuration values are set correctly for your Azure Function...  
+- When deployed, you will set these as variables in the Portal `Settings -> Configuration` of the Azure Function.  
+- When running locally in IntelliJ these will be set in the AppSettings of the Run/Debug Configuration for IntelliJ.  And, in VS Code these are stored in the `local.settings.json` configuration file (included).
+
+Configuration Values:
+- `FUNCTIONS_WORKER_RUNTIME` = `java`
+- `FUNCTIONS_EXTENSION_VERSION` = `~3`
+- `FUNCTIONS_CORE_TOOLS_DISPLAY_LOGO` = `true` (pretty sure this is optional, but I like having it)
+- `JAVA_HOME` = `C:\Program Files\Zulu\zulu-11\` _(may be optional, but at one point this was the only way I got it to find the right version before uninstalling everything else)_
+- `AzureWebJobsStorage` = `UseDevelopmentStorage=true` OR `Initialize a new Azure Function in the Portal to get a valid Web Jobs storage key` 
+  - _Note: this one is required for the **KeepWarmFunction** that helps keep the Azure function performance up after sitting for a while...  you can always just comment out that Function class to eliminate this dependency, but it's very helpful in production environments.)_
+  - [Here are the instructions for installing/running the Storage Emulator (Windows) or Azurite Emulator (Linux)](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator#get-the-storage-emulator) to run completely locally.
+  - OR you may create your Azure function and configure your real connection string here.
+- `KeepWarmCronSchedule` = `0 */5 * * * *` _(also required configuration for the KeepWarmFunction)_
+- `DebuggingEnabled` = `true` (Optional but very helpful once you start using it to return debug details in the responses).
+
 ## Calling the Service from .Net
 
 ### Snippet:

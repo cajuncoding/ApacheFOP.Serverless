@@ -36,6 +36,12 @@ public class ResourceUtils {
 
     public static Path MapServerPath(Path pathToMap) {
         var basePath = getBaseMappedPath();
+        
+        //Guard to ensure that the path is something inside of the current Base Path, 
+        //  otherwise relativize() will throw Exceptions.
+        if(!pathToMap.startsWith(basePath))
+            return null;
+
         var relativePath = basePath.relativize(pathToMap);
         return relativePath;
     }

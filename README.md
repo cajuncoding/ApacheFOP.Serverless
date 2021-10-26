@@ -14,6 +14,15 @@ then I do love-me-some-coffee!*
 </a> 
 
 ## Updates / Change Log
+##### Updated the project to v1.4 with the following:
+ - **Added support for running, debugging, and deploying from within VS Code as well as IntelliJ IDEA**.
+   - Both project types use folder context configuration, so all configuration files have now been included and checked into the Repository.
+   - This should make it easier to get up and running quickly with either IDE.
+ - Resolved a bug in the Font loading/path handling when running in Windows Host (due to existing font paths).
+ - Updated Microsoft's `azure-functions-maven-plugin` to address various issues (esp. the need for a GUID in the deployment name which broke VS Code's ability to debug).
+ - Pom.xml cleanup to eliminate various "*Problems*" flagged by VS Code's pom parsing (using M2Eclipse processor
+ - Various small code cleanup items as noted in VS Code Java "*Problems*" tab.
+ 
 ##### Updated the project to v1.3 with the following:
  - Added support for Azure Function configuration capability to enable Accessibility since Apache FOP `<accessibility>` xml config element is not working as of v2.6.
    - Added an XslFO markup sample to test/demonstrate Accessibility in `resources/samples/WorkinWithAccessibilitySample.fo`.
@@ -98,17 +107,31 @@ And ultimately, it didn't provide any insight on how to configure Maven correctl
 ## Getting Started:
 Here's the high level steps to get started...
 
-1. First start with this article to get your Java IDE *IntelliJ IDEA* setup with Azure Toolkit!
-   - [https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij)
-   - It uses [IntelliJ IDEA](https://www.jetbrains.com/idea/); the best Java IDE available (*in my humble opinion*), especially for those new to Java :-)
-   - It guides you on the use of **The Azure Toolkit** for IntelliJ IDEA which will make debugging & deploying a breeze...
+#### Want to run it locally?
+1. First get your Java IDE (_**IntelliJ IDEA**_ or _**VS Code**_) setup with Azure Toolkit!
+   - **IntelliJ IDEA:**
+     - Setup IntelliJ for Azure Function development:[https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij)
+       - NOTE: As of June 30th, 2021, the original Zulu JDK is now deprecated and Microsoft's OpenJDK should now be installed instead.
+       - Install the Azure Functions supported JDK from **Microsoft OpenJDK v11**: [https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-support-on-azure](https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-support-on-azure)
+     - [IntelliJ IDEA](https://www.jetbrains.com/idea/), my humble opinion is the best Java IDE available (*in my humble opinion*), especially for those new to Java :-)
+     - this guide will walk you through use of **The Azure Toolkit** for IntelliJ IDEA which will make debugging & deploying a breeze...
+   - **VS Code:**
+     - Install the Java Extensions in VS Code: [https://code.visualstudio.com/docs/java/java-tutorial#_installing-extensions](https://code.visualstudio.com/docs/java/java-tutorial#_installing-extensions)
+     - Install the Azure Functions supported JDK from **Microsoft's OpenJDK v11**: 
+       - Using the VS Code Runtime Configuration Wizard (recommended): [https://code.visualstudio.com/docs/java/java-tutorial#_using-the-java-runtime-configuration-wizard](https://code.visualstudio.com/docs/java/java-tutorial#_using-the-java-runtime-configuration-wizard)
+       - Or manually, and then configuring it within VS Code: [https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-support-on-azure](https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-support-on-azure)
 2. This project has already been configured using an Azure Functions Maven archetype, and all necessary dependencies for ApacheFOP, Apache Commons libraries, etc. have already been configured correctly.
-3. Once IntelliJ is up and running, you can pull down the Repo, and then just open the `apachefop-serverless-az-func` as the root project -- I just right click and select _**"Open Folder as IntelliJ Community Edition Project"**_.
-4. It's usually a good idea to reload the Maven pom.xml -- which will refresh and ensure that all dependencies are ready to go.
-5. [Run the function app locally and debug](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij#debug-the-function-app-locally) . . . click the good-ole Debug Icon in IntelliJ and fire up the micro-service locally.
+3. Once IntelliJ or VS Code is up and running, you can pull down the Repo, and then just open the `apachefop-serverless-az-func` as the root project -- I just right click and select:
+   - IntelliJ: _**"Open Folder as IntelliJ Community Edition Project"**_.
+   - VS Code: _**"Open with Code"**_
+4. It's usually a good idea to reload the Maven pom.xml and kick off a build to load all dependencies by running/executing the **`package`** phase in the Maven console of either IntelliJ or VS Code.
+5. IntelliJ: Run the function app locally and debug via [IntelliJ](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij#debug-the-function-app-locally) or [VS Code](https://code.visualstudio.com/docs/java/java-tutorial#_running-and-debugging-your-program) . . . click the good-ole Debug/Run Icon and fire up the micro-service locally.
    - Yes, this will fully support local execution, testing, and debugging!
-6. Install Postman (or equivalent) and play with it...
-7. Finally, [Deploy to Azure using the Azure Toolkit](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij#deploy-your-function-app-to-azure) whenever you're ready...
+6. Install Postman/Insomnia/etc. and play with it by posting your Xsl-FO Markup to the Service and seeing your PDF be returned (see above screenshots)...
+7. Finally, Deploy to Azure using the Azure Toolkit via [IntelliJ](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij#deploy-your-function-app-to-azure) or [VS Code](https://docs.microsoft.com/en-us/azure/developer/javascript/tutorial/vscode-function-app-http-trigger/tutorial-vscode-serverless-node-deploy-hosting) whenever you're ready...
+
+#### Just want it Running in Azure and don't want to bother with any local installations?
+If you'd rather just deploy directly to Azure, then there's some info on using Github Actions to do just that with no local installation required shared over here: https://github.com/cajuncoding/ApacheFOP.Serverless/issues/3#issuecomment-950820278 
 
 ## Additional Features:
 

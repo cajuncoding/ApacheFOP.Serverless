@@ -13,7 +13,7 @@ import java.util.Optional;
  */
 public class ApacheFopGzipFunction {
     /**
-     * This function listens at endpoint "/api/apache-fop/xslfo". Two ways to invoke it using "curl" command in bash:
+     * This function listens at endpoint "/api/apache-fop/gzip".
      */
     @FunctionName("ApacheFOPGzip")
     public HttpResponseMessage run(

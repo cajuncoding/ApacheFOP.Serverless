@@ -1,7 +1,6 @@
 package com.cajuncoding.apachefop.serverless.web;
 
 import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopRenderer;
-import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessResponseBuilder;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.cajuncoding.apachefop.serverless.utils.AzureFunctionUtils;
 import com.microsoft.azure.functions.HttpRequestMessage;
@@ -29,7 +28,7 @@ public class ApacheFopServerlessFunctionExecutor {
         var config = new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
 
         //Create the Response Builder to handle the various responses we support.
-        var responseBuilder = new ApacheFopServerlessResponseBuilder(request);
+        var responseBuilder = new ApacheFopServerlessResponseBuilder<byte[]>(request);
 
         //Get the XslFO Source from the Request (handling GZip Payloads if specified)...
         var xslFOBodyContent = request.getBody().isPresent()
@@ -51,7 +50,7 @@ public class ApacheFopServerlessFunctionExecutor {
         var config = new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
 
         //Create the Response Builder to handle the various responses we support.
-        var responseBuilder = new ApacheFopServerlessResponseBuilder(request);
+        var responseBuilder = new ApacheFopServerlessResponseBuilder<String>(request);
 
         //Get the XslFO Source from the Request (handling GZip Payloads if specified)...
         var xslFOBodyContent = request.getBody().isPresent()
@@ -63,10 +62,10 @@ public class ApacheFopServerlessFunctionExecutor {
         return ExecuteRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
     }
 
-    private HttpResponseMessage ExecuteRequestInternal(
+    protected <TRequest> HttpResponseMessage ExecuteRequestInternal(
             String xslFOBodyContent,
             ApacheFopServerlessConfig config,
-            ApacheFopServerlessResponseBuilder responseBuilder,
+            ApacheFopServerlessResponseBuilder<TRequest> responseBuilder,
             Logger logger
     ) throws TransformerException, IOException, FOPException {
         if (StringUtils.isBlank(xslFOBodyContent)) {
@@ -87,8 +86,8 @@ public class ApacheFopServerlessFunctionExecutor {
         //Initialize the ApacheFopRenderer (potentially optimized with less logging.
         //NOTE: If used, the Logger must be the instance injected into the Azure Function!
         ApacheFopRenderer fopHelper = config.isApacheFopLoggingEnabled()
-                ? new ApacheFopRenderer(logger)
-                : new ApacheFopRenderer();
+                ? new ApacheFopRenderer(config, logger)
+                : new ApacheFopRenderer(config);
 
         //Execute the transformation of the XSL-FO source content to Binary PDF format...
         var pdfRenderResult = fopHelper.renderPdfResult(xslFOBodyContent, config.isGzipResponseEnabled());

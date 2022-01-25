@@ -13,8 +13,32 @@ then I do love-me-some-coffee!*
 <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174">
 </a> 
 
-## Updates
-Updated the project to v1.1 as it now incorporates the following new updates:
+## Updates / Change Log
+##### Updated the project to v1.4 with the following:
+ - **Added support for running, debugging, and deploying from within VS Code as well as IntelliJ IDEA**.
+   - Both project types use folder context configuration, so all configuration files have now been included and checked into the Repository.
+   - This should make it easier to get up and running quickly with either IDE.
+ - Resolved a bug in the Font loading/path handling when running in Windows Host (due to existing font paths).
+ - Updated Microsoft's `azure-functions-maven-plugin` to address various issues (esp. the need for a GUID in the deployment name which broke VS Code's ability to debug).
+ - Pom.xml cleanup to eliminate various "*Problems*" flagged by VS Code's pom parsing (using M2Eclipse processor
+ - Various small code cleanup items as noted in VS Code Java "*Problems*" tab.
+ 
+##### Updated the project to v1.3 with the following:
+ - Added support for Azure Function configuration capability to enable Accessibility since Apache FOP `<accessibility>` xml config element is not working as of v2.6.
+   - Added an XslFO markup sample to test/demonstrate Accessibility in `resources/samples/WorkinWithAccessibilitySample.fo`.
+   - Updated KeepinItWarm.fo to run correctly when Accessibility is enabled.
+ - Added in-memory caching of Java embedded resources that are resolved (e.g. Fonts) for performance.
+ - Code cleanup.
+
+##### Updated the project to v1.2 with the following:
+ - Added support for Custom Font integration as Resource Files in the project and deployed with the JAR!
+   - This enables adding fonts easily by simply dropping them in the `resources/fonts` folder, and then registering them via configuration in the `apache-fop-config.xml` according to [Apache FOP Font Documentation](https://xmlgraphics.apache.org/fop/2.6/fonts.html#register).
+   - Added a a couple sample (free) custom fonts and sample markup `resources/samples/WorkinWithFontsSample.fo` in the project.
+ - Fixed bug in the render Event Log debug details returned in the Http Header whereby Apache FOP may send Unicode Characters but only ASCII are allowed; Unicode are now safely escaped into their respective Hex Codes so that the message is readable.
+ - Fixed issue in Maven build to enforce the clean stage so the artifact always contains the latest changes (e.g. especially physical resource file changes) when debugging.
+ - Some miscellaneous code cleanup.
+
+##### Updated the project to v1.1 as it now incorporates:
  - Upgraded the project to use Java v11 now as the latest long term supported (LTS) version for Azure Functions (aka Zulu Java v11)
    - _Previously was Java 8 (v1.8) (aka Zulu Java v8)._
  - Bumping the versions of all dependencies to the latest stable versions
@@ -61,7 +85,7 @@ I ramble on about that over here in:
 
 Suffice it to say that markup based solutions have alot of value, and Xsl-FO is still one of the best ways to maintain strong software development practices by rendering PDF outputs (as a presentation output) from separated content/data + template. And Xsl-FO offers features that some approaches just can't do (looking at you *Crystal Reports*).
 
-There has been a fully managed .Net C# port of [Apache FOP](https://xmlgraphics.apache.org/fop/) (FO.Net) based on a pre-v1.0 version (*is my guesstimate*); it's old & unsupported, but still fairly functional, and I've used it very successfully on several projects. But Apache FOP is now on [v2.6 as of Jan 2021!](https://xmlgraphics.apache.org/fop/2.6/changes_2.6.html) with annual/bi-annual support updates still being released.
+There has been a fully managed .Net C# port of [Apache FOP](https://xmlgraphics.apache.org/fop/) (FO.Net) based on a pre-v1.0 version (*is my guesstimate*); it's old & unsupported, but still fairly functional, and I've used it very successfully on several projects. But Apache FOP is now on [v2.5 as of May 2020!](https://xmlgraphics.apache.org/fop/2.5/changes_2.5.html) with annual/bi-annual support updates still being released.
 
 So my goal has been, for a while, to take advantage of the many great innovations in the past several years to provide an interoperable integration between Java Apache FOP and .Net, without resorting to [something that makes my eyes cross (ugg).](http://codemesh.com/products/juggernet/).
 
@@ -83,21 +107,35 @@ And ultimately, it didn't provide any insight on how to configure Maven correctl
 ## Getting Started:
 Here's the high level steps to get started...
 
-1. First start with this article to get your Java IDE *IntelliJ IDEA* setup with Azure Toolkit!
-   - [https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij)
-   - It uses [IntelliJ IDEA](https://www.jetbrains.com/idea/); the best Java IDE available (*in my humble opinion*), especially for those new to Java :-)
-   - It guides you on the use of **The Azure Toolkit** for IntelliJ IDEA which will make debugging & deploying a breeze...
+#### Want to run it locally?
+1. First get your Java IDE (_**IntelliJ IDEA**_ or _**VS Code**_) setup with Azure Toolkit!
+   - **IntelliJ IDEA:**
+     - Setup IntelliJ for Azure Function development:[https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij)
+       - NOTE: As of June 30th, 2021, the original Zulu JDK is now deprecated and Microsoft's OpenJDK should now be installed instead.
+       - Install the Azure Functions supported JDK from **Microsoft OpenJDK v11**: [https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-support-on-azure](https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-support-on-azure)
+     - [IntelliJ IDEA](https://www.jetbrains.com/idea/), my humble opinion is the best Java IDE available (*in my humble opinion*), especially for those new to Java :-)
+     - this guide will walk you through use of **The Azure Toolkit** for IntelliJ IDEA which will make debugging & deploying a breeze...
+   - **VS Code:**
+     - Install the Java Extensions in VS Code: [https://code.visualstudio.com/docs/java/java-tutorial#_installing-extensions](https://code.visualstudio.com/docs/java/java-tutorial#_installing-extensions)
+     - Install the Azure Functions supported JDK from **Microsoft's OpenJDK v11**: 
+       - Using the VS Code Runtime Configuration Wizard (recommended): [https://code.visualstudio.com/docs/java/java-tutorial#_using-the-java-runtime-configuration-wizard](https://code.visualstudio.com/docs/java/java-tutorial#_using-the-java-runtime-configuration-wizard)
+       - Or manually, and then configuring it within VS Code: [https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-support-on-azure](https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-support-on-azure)
 2. This project has already been configured using an Azure Functions Maven archetype, and all necessary dependencies for ApacheFOP, Apache Commons libraries, etc. have already been configured correctly.
-3. Once IntelliJ is up and running, you can pull down the Repo, and then just open the `apachefop-serverless-az-func` as the root project -- I just right click and select _**"Open Folder as IntelliJ Community Edition Project"**_.
-4. It's usually a good idea to reload the Maven pom.xml -- which will refresh and ensure that all dependencies are ready to go.
-5. [Run the function app locally and debug](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij#debug-the-function-app-locally) . . . click the good-ole Debug Icon in IntelliJ and fire up the micro-service locally.
+3. Once IntelliJ or VS Code is up and running, you can pull down the Repo, and then just open the `apachefop-serverless-az-func` as the root project -- I just right click and select:
+   - IntelliJ: _**"Open Folder as IntelliJ Community Edition Project"**_.
+   - VS Code: _**"Open with Code"**_
+4. It's usually a good idea to reload the Maven pom.xml and kick off a build to load all dependencies by running/executing the **`package`** phase in the Maven console of either IntelliJ or VS Code.
+5. IntelliJ: Run the function app locally and debug via [IntelliJ](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij#debug-the-function-app-locally) or [VS Code](https://code.visualstudio.com/docs/java/java-tutorial#_running-and-debugging-your-program) . . . click the good-ole Debug/Run Icon and fire up the micro-service locally.
    - Yes, this will fully support local execution, testing, and debugging!
-6. Install Postman (or equivalent) and play with it...
-7. Finally, [Deploy to Azure using the Azure Toolkit](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij#deploy-your-function-app-to-azure) whenever you're ready...
+6. Install Postman/Insomnia/etc. and play with it by posting your Xsl-FO Markup to the Service and seeing your PDF be returned (see above screenshots)...
+7. Finally, Deploy to Azure using the Azure Toolkit via [IntelliJ](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-maven-intellij#deploy-your-function-app-to-azure) or [VS Code](https://docs.microsoft.com/en-us/azure/developer/javascript/tutorial/vscode-function-app-http-trigger/tutorial-vscode-serverless-node-deploy-hosting) whenever you're ready...
+
+#### Just want it Running in Azure and don't want to bother with any local installations?
+If you'd rather just deploy directly to Azure, then there's some info on using Github Actions to do just that with no local installation required shared over here: https://github.com/cajuncoding/ApacheFOP.Serverless/issues/3#issuecomment-950820278 
 
 ## Additional Features:
 
-#### GZIP Compression:
+### GZIP Compression:
 In addition to rendering the PDF, this service already implements GZIP compression for returning the Binary PDF files. This can greatly improve performance and download times, especially for PDFs rendered without much imagery, as the text content bytes tends to be more compressible.
 
 All you need to do is add the `Accept-Encoding` header with a value of `gzip` to the request:
@@ -107,6 +145,38 @@ Accept-Encoding=gzip
 <p align="center">
     <img src="/postman-header-enable-gzip.png" style="width:auto;height:auto;max-width:800px;">
 </p>
+
+### Custom Fonts via Resource Files:
+##### Add Font Files (*.ttf, *.otf, etc.)
+To easily utilize custom fonts with the Azure Functions deployment, this project provides the ability to simply add them into the project as resource
+files by simply placing them in the `src/main/resources/fonts` folder.  So you can literally just copy them into the project and deploy. In IntelliJ IDEA the structure will look like:
+<p align="center">
+    <img src="/intellij-resources-fonts-project-structure.png" style="width:auto;height:auto;max-width:500px;">
+</p>
+
+Once there they can be resolved at runtime by the application even after being deployed to Azure Functions; because they will be embedded resources with the JAR file. ApacheFOP.Serverless has a custom `ResourceResolver` implementation that can then locate these via relative path is used when registering the fonts via configuration in the `apache-fop-config.xml` according to [Apache FOP Font Documentation](https://xmlgraphics.apache.org/fop/2.6/fonts.html#register).
+
+### Enable Accessibility:
+Apache FOP Supports accessibility compliance in PDFs however, the `<accessibility>` xml configuration attribute noted in the documentation ([here](https://xmlgraphics.apache.org/fop/2.6/accessibility.html)) does not work as of v2.6. 
+
+Therefore ApacheFOP.Serverless provides an Azure Function configuration value to set this directly which can be enabled by setting the Azure Functions environment config value: `'AccessibilityEnabled' = 'true'`.
+
+## Basic Azure Functions Configuration Values:
+Ensure that the configuration values are set correctly for your Azure Function...  
+- When deployed, you will set these as variables in the Portal `Settings -> Configuration` of the Azure Function.  
+- When running locally in IntelliJ these will be set in the AppSettings of the Run/Debug Configuration for IntelliJ.  And, in VS Code these are stored in the `local.settings.json` configuration file (included).
+
+Configuration Values:
+- `FUNCTIONS_WORKER_RUNTIME` = `java`
+- `FUNCTIONS_EXTENSION_VERSION` = `~3`
+- `FUNCTIONS_CORE_TOOLS_DISPLAY_LOGO` = `true` (pretty sure this is optional, but I like having it)
+- `JAVA_HOME` = `C:\Program Files\Zulu\zulu-11\` _(may be optional, but at one point this was the only way I got it to find the right version before uninstalling everything else)_
+- `AzureWebJobsStorage` = `UseDevelopmentStorage=true` OR `Initialize a new Azure Function in the Portal to get a valid Web Jobs storage key` 
+  - _Note: this one is required for the **KeepWarmFunction** that helps keep the Azure function performance up after sitting for a while...  you can always just comment out that Function class to eliminate this dependency, but it's very helpful in production environments.)_
+  - [Here are the instructions for installing/running the Storage Emulator (Windows) or Azurite Emulator (Linux)](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator#get-the-storage-emulator) to run completely locally.
+  - OR you may create your Azure function and configure your real connection string here.
+- `KeepWarmCronSchedule` = `0 */5 * * * *` _(also required configuration for the KeepWarmFunction)_
+- `DebuggingEnabled` = `true` (Optional but very helpful once you start using it to return debug details in the responses).
 
 ## Calling the Service from .Net
 

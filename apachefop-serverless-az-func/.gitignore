@@ -24,11 +24,10 @@ hs_err_pid*
 
 # IDE
 .idea/
-*.iml
+# *.iml
 .settings/
 .project
 .classpath
-.vscode/
 
 # macOS
 .DS_Store

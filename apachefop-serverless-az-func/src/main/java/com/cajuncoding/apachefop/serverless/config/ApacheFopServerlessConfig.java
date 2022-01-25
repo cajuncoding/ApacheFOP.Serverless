@@ -2,33 +2,37 @@ package com.cajuncoding.apachefop.serverless.config;
 
 import com.cajuncoding.apachefop.serverless.http.HttpEncodings;
 import com.cajuncoding.apachefop.serverless.http.HttpHeaders;
-import com.microsoft.azure.functions.HttpRequestMessage;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
-import java.util.Optional;
 
-public class ApacheFopServerlessConfig<T> {
+public class ApacheFopServerlessConfig {
     //Request Configuration Parameters...
     private boolean isGzipRequestEnabled = false;
     private boolean isGzipResponseEnabled = false;
     private boolean isBase64RequestEnabled = false;
-    private String apacheFopServerlessContentType = StringUtils.EMPTY;
+//    private String apacheFopServerlessContentType = StringUtils.EMPTY;
 
     //Azure Function Configuration Settings...
     private boolean debuggingEnabled = false;
     private boolean apacheFopLoggingEnabled  = true;
     private boolean isGzipRequestSupported = true;
     private boolean eventLogDumpModeEnabled = false;
+    private boolean accessibilityPdfRenderingEnabled = false;
     private int maxHeaderBytesSize = 4096;
 
-    public ApacheFopServerlessConfig(Map<String, String> requestHeaders, Map<String, String> requestQueryParams) {
-        ReadEnvironmentConfig();
-        ReadRequestHeadersConfig(requestHeaders);
+    public ApacheFopServerlessConfig() {
+        this(null, null);
     }
 
-    private void ReadEnvironmentConfig() {
+    public ApacheFopServerlessConfig(Map<String, String> requestHeaders, Map<String, String> requestQueryParams) {
+        readEnvironmentConfig();
+        readRequestHeadersConfig(requestHeaders);
+        readRequestQueryParamsConfig(requestQueryParams);
+    }
+
+    protected void readEnvironmentConfig() {
         //Enable Debugging by default which enables the Apache FOP Event Log to be returned via Response Header, etc.
         //NOTE: this can be disabled to save unnecessary logging, returning of Debug Headers, etc.
         this.debuggingEnabled = getConfigAsBooleanOrDefault("DebuggingEnabled", true);
@@ -39,10 +43,22 @@ public class ApacheFopServerlessConfig<T> {
 
         //Enable support for Gzip Requests for performance improvements; this option provides a way to disable support
         //  in use-cases or environments where GZIP bombing (e.g. DoS attack) is a risk.
-        this.isGzipRequestSupported =  getConfigAsBooleanOrDefault("GzipRequestSupportEnabled", true);
+        this.isGzipRequestSupported = getConfigAsBooleanOrDefault("GzipRequestSupportEnabled", true);
+
+        //Despite being noted in the Apache FOP Accessibility specific documentation the <accessibility> xml configuration option
+        //  does not work; nor is it not listed in the generalized configuration page.  However it can be set programmatically
+        //  therefore we provide this configuration option via ApacheFOP.Serverless configuration in Azure Functions.
+        //NOTE: Generally this configuration is set in accordance with the <pdf-ua-mode> configuration element of the PDF Renderer
+        //      which is controlled in the Apache FOP Configuration xml.
+        //NOTE: If the accessibility configuration is used (e.g. <pdf-ua-mode>PDF/UA-1</pdf-ua-mode>) is used then this
+        //      configuration must be enabled or the PDF rendering will return an error stating that accessibility must be enabled!
+        this.accessibilityPdfRenderingEnabled = getConfigAsBooleanOrDefault("AccessibilityEnabled", false);
     }
 
-    private void ReadRequestHeadersConfig(Map<String, String> headers) {
+    protected void readRequestHeadersConfig(Map<String, String> headers) {
+        if(headers == null || headers.isEmpty())
+            return;
+
         //Determine if the current request Content Encodings specified contain GZIP (as that's all that is currently supported).
         //NOTE: Headers are LowerCased in the returned Map!
         String contentEncodingHeader = headers.getOrDefault(HttpHeaders.CONTENT_ENCODING_LOWERCASE, null);
@@ -54,14 +70,17 @@ public class ApacheFopServerlessConfig<T> {
         String acceptEncodingHeader = headers.getOrDefault(HttpHeaders.ACCEPT_ENCODING_LOWERCASE, null);
         this.isGzipResponseEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
 
-        //Get the Custom ContentType specified for reference
-        this.apacheFopServerlessContentType = headers.getOrDefault(
-            ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_CONTENT_TYPE_LOWERCASE,
-            StringUtils.EMPTY
-        );
+//        //Get the Custom ContentType specified for reference
+//        this.apacheFopServerlessContentType = headers.getOrDefault(
+//            ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_CONTENT_TYPE_LOWERCASE,
+//            StringUtils.EMPTY
+//        );
     }
 
-    private void ReadRequestQueryParamsConfig(Map<String, String> queryParams) {
+    protected void readRequestQueryParamsConfig(Map<String, String> queryParams) {
+        if(queryParams == null || queryParams.isEmpty())
+            return;
+
         //Determine if Event Log Dump mode is enabled (vs PDF Binary return).
         this.eventLogDumpModeEnabled = BooleanUtils.toBoolean(
                 queryParams.getOrDefault(ApacheFopServerlessQueryParams.EventLogDump, null)
@@ -83,7 +102,9 @@ public class ApacheFopServerlessConfig<T> {
 
     public boolean isGzipRequestSupported() { return isGzipRequestSupported; }
 
-    public String getApacheFopServerlessContentType() { return apacheFopServerlessContentType; }
+    public boolean isAccessibilityPdfRenderingEnabled() { return accessibilityPdfRenderingEnabled; }
+
+//    public String getApacheFopServerlessContentType() { return apacheFopServerlessContentType; }
 
     public int getMaxHeaderBytesSize() { return maxHeaderBytesSize; }
 
@@ -110,12 +131,12 @@ public class ApacheFopServerlessConfig<T> {
         return value;
     }
 
-    private String getConfigValueOrDefault(String name, String defaultValue) {
-        String value = getConfigValue(name);
-        return StringUtils.isBlank(value)
-            ? defaultValue
-            : value;
-    }
+    // private String getConfigValueOrDefault(String name, String defaultValue) {
+    //     String value = getConfigValue(name);
+    //     return StringUtils.isBlank(value)
+    //         ? defaultValue
+    //         : value;
+    // }
 
     private boolean getConfigAsBooleanOrDefault(String name, boolean defaultValue) {
         String value = getConfigValue(name);

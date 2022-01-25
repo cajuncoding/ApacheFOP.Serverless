@@ -1,6 +1,7 @@
 package com.cajuncoding.apachefop.serverless;
 
 import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopRenderer;
+import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConstants;
 import com.cajuncoding.apachefop.serverless.utils.ResourceUtils;
 import com.cajuncoding.apachefop.serverless.utils.TextUtils;
@@ -33,15 +34,18 @@ public class KeepWarmFunction {
 
         logger.info(MessageFormat.format(" - Executing at [{0}]", TextUtils.getCurrentW3cDateTime()));
 
-        var xslFoSource = ResourceUtils.LoadResourceAsString(ApacheFopServerlessConstants.KeepinItWarmXslFo);
+        var xslFoSource = ResourceUtils.loadResourceAsString(ApacheFopServerlessConstants.KeepinItWarmXslFo);
         logger.info(MessageFormat.format(" - XSL-FO Keep Warm XslFo Script Loaded [Length={0}]", xslFoSource.length()));
 
         //Now we process the XSL-FO source...
         logger.info("Executing Transformation with Apache FOP...");
 
+        //Read the Configuration from AzureFunctions (request, environment variables)
+        var config = new ApacheFopServerlessConfig();
+
         //Initialize the ApacheFopRenderer (potentially optimized with less logging.
         //NOTE: If used, the Logger must be the instance injected into the Azure Function!
-        ApacheFopRenderer fopHelper = new ApacheFopRenderer(logger);
+        ApacheFopRenderer fopHelper = new ApacheFopRenderer(config, logger);
 
         //Execute the transformation of the XSL-FO source content to Binary PDF format...
         var pdfRenderResult = fopHelper.renderPdfResult(xslFoSource, false);

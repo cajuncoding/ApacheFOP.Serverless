@@ -12,9 +12,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
-        <functionAppName>apachefop-serverless-az-func</functionAppName>
-        <stagingDirectory>${project.build.directory}/azure-functions/${functionAppName}</stagingDirectory>
-        <!-- <functionAppRegion>westus</functionAppRegion> -->
+        <appBaseName>apachefop-serverless-az-func</appBaseName>
+        <stagingDirectory>${project.build.directory}/azure-functions/${appBaseName}</stagingDirectory>
     </properties>
 
     <dependencies>

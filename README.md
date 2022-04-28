@@ -228,9 +228,10 @@ namespace PdfTemplating.XslFO.ApacheFOP.Serverless
 ```
 
 ### .Net PdfTemplating (Full blown) Sample Implementation & .NET Client:
-A full blown implementation of templating + ApacheFOP.Serverless is in a branch of my [Pdf Templating project here](https://github.com/cajuncoding/PdfTemplating.XslFO).
+A full blown implementation of `Razor Templating + ApacheFOP.Serverless` is my [PdfTemplating.XslFO project here](https://github.com/cajuncoding/PdfTemplating.XslFO).
 
-This project also provides ready-to-use .NET Client for `ApacheFOP.Serverless` that is readily availalbe in Nuget: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)
+#### .NET Client
+The `PdfTemplating.XslFO` project also provides ready-to-use .NET Client for `ApacheFOP.Serverless` that is readily availalbe in Nuget: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)
 
 It illustrates the use of both Xslt and/or Razor templates from ASP.Net MVC to render PDF Binary reports dynamically from queries to the [Open Movie Database API](http://www.omdbapi.com/). And it has now been enhanced to also illustrate the use of _ApacehFOP.Serverless_ microservice for rendering instead of the embedded legacy FO.Net implementation.
 

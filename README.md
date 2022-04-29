@@ -76,7 +76,7 @@ If an error occurs -- likely due to incorrect Xsl-FO syntax or structure -- then
 </p>
 
 ## Project Overview:
-Generating high quality printable PDF outputs from a highly flexible [pdf templating approach (separating content/data from presentation)](https://github.com/cajuncoding/PdfTemplating.XslFO) hasn't been easy in the world of .Net -- vs the world of Java where ApacheFOP has been around for a very long time.
+Generating high quality printable PDF outputs from a highly flexible [pdf templating approach (separating content/data from presentation)](https://github.com/cajuncoding/PdfTemplating.XslFO) hasn't been easy in the world of .NET -- vs the world of Java where ApacheFOP has been around for a very long time.
 
 For a more exhaustive dive into why PDF templating and markup based solutions are more powerful than report designer based solutions -- in today's modern web apps -- 
 I ramble on about that over here in: 
@@ -85,12 +85,12 @@ I ramble on about that over here in:
 
 Suffice it to say that markup based solutions have alot of value, and Xsl-FO is still one of the best ways to maintain strong software development practices by rendering PDF outputs (as a presentation output) from separated content/data + template. And Xsl-FO offers features that some approaches just can't do (looking at you *Crystal Reports*).
 
-There has been a fully managed .Net C# port of [Apache FOP](https://xmlgraphics.apache.org/fop/) (FO.Net) based on a pre-v1.0 version (*is my guesstimate*); it's old & unsupported, but still fairly functional, and I've used it very successfully on several projects. But Apache FOP is now on [v2.5 as of May 2020!](https://xmlgraphics.apache.org/fop/2.5/changes_2.5.html) with annual/bi-annual support updates still being released.
+There has been a fully managed .NET C# port of [Apache FOP](https://xmlgraphics.apache.org/fop/) (FO.Net) based on a pre-v1.0 version (*is my guesstimate*); it's old & unsupported, but still fairly functional, and I've used it very successfully on several projects. But Apache FOP is now on [v2.5 as of May 2020!](https://xmlgraphics.apache.org/fop/2.5/changes_2.5.html) with annual/bi-annual support updates still being released.
 
-So my goal has been, for a while, to take advantage of the many great innovations in the past several years to provide an interoperable integration between Java Apache FOP and .Net, without resorting to [something that makes my eyes cross (ugg).](http://codemesh.com/products/juggernet/).
+So my goal has been, for a while, to take advantage of the many great innovations in the past several years to provide an interoperable integration between Java Apache FOP and .NET, without resorting to [something that makes my eyes cross (ugg).](http://codemesh.com/products/juggernet/).
 
 Taking advantage of some awesome new innovations (in Azure) we can do this in a much cleaner way using:
- - **[C# .Net for Templating using Razor](https://github.com/cajuncoding/PdfTemplating.XslFO)** *(anything other than native Java will benefit from this)*
+ - **[C# .NET for Templating using Razor](https://github.com/cajuncoding/PdfTemplating.XslFO)** *(anything other than native Java will benefit from this)*
  - **Microservice** for integration architecture
  - **REST API** for interoperability
  - **Azure Function** for native Java Support
@@ -178,14 +178,14 @@ Configuration Values:
 - `KeepWarmCronSchedule` = `0 */5 * * * *` _(also required configuration for the KeepWarmFunction)_
 - `DebuggingEnabled` = `true` (Optional but very helpful once you start using it to return debug details in the responses).
 
-## Calling the Service from .Net
+## Calling the Service from .NET
 
 ### Snippet:
-Because I talked about follow-through up above, I'd be amiss if I didn't provide a sample implementation of calling this code from .Net.
+Because I talked about follow-through up above, I'd be amiss if I didn't provide a sample implementation of calling this code from .NET.
 
-Assuming the use of the great *RESTSharp library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml)... this sample should get you started on the .Net side as a client calleing the new PDF microservice.
+Assuming the use of the great *RESTSharp library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml)... this sample should get you started on the .NET side as a client calleing the new PDF microservice.
 
-*NOTE: Just use RESTSharp and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
+*NOTE: Just use (RESTSharp)[https://restsharp.dev/] or (Flurl)[https://flurl.dev/] and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
 
 Snippet taken from the [implementation here](https://github.com/cajuncoding/PdfTemplating.XslFO), in my PdfTemplating project but is also readily available as a .NET Client in Nuget -- more details below.
 

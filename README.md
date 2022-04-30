@@ -1,5 +1,7 @@
-# ApacheFOP.Serverless
-*ApacheFOP.Serverless* is a ready to use server-less implementation of Apache FOP via Azure Functions. This provides a micro-service for dynamically rendering PDF binary outputs from XSL-FO source using Apache FOP.
+# ApacheFOP.Serverless -- Quality PDF Rendering-as-a-service for any Environment!
+*ApacheFOP.Serverless* is a ready to use server-less implementation of Apache FOP via Azure Functions. This provides an easy to use REST API micro-service for dynamically rendering quality PDF binary outputs from XSL-FO source using Apache FOP.
+
+When combined with the ease and simplicity of Azure Functions this project is a powerful, efficient, and scalable PDF Reporting Service that generates high quality, true paged media, reports for any environment and any client technology (.Net, NodeJS/JavaScript, Ruby,  Mobile iOS/Android, Powershell, even Windows/Mac apps, etc.)!
 
 You should be able to pull this code down, open with IntelliJ (after installing the Azure Toolkit for IntelliJ), and deploy to your own Subscription/Resource group and be up and running in minutes.
 

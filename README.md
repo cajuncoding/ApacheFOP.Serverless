@@ -106,6 +106,12 @@ But, I did find that article left alot of nebulous details unclear, and would ex
 
 And ultimately, it didn't provide any insight on how to configure Maven correctly *(I can hear some devs asking "what's Maven" right now)* or any code at all really. So, **Kudos** for the intro, but I hope this helps to bring it across the goal line!
 
+### Conceptual Diagram - PDF-as-a-service:
+<img src="https://user-images.githubusercontent.com/20844814/166123451-afd6a573-9e9f-452d-a0b9-4512ee6cc189.png" width="500px" />
+
+### Conceptual Diagram - PDF Templating
+<img src="https://user-images.githubusercontent.com/20844814/166123633-8e15a41b-6510-4cc9-a991-b4dfc25f08fe.png" width="500px" />
+
 ## Getting Started:
 Here's the high level steps to get started...
 

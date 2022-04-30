@@ -51,11 +51,9 @@ then I do love-me-some-coffee!*
  - Removed dependency on `com.sun.deploy.net.HttpRequest` import as importing it no longer compiles on the latest versions of IntelliJ IDEA; little value was added by using only one constant that was needed: _ACCEPT_ENCODING_
  - All Heading and Content type constants are now self-contained so no additional dependencies are needed.
    - _This enabled removal of the dependency on com.sun.deploy.net.HttpRequest import as importing it no longer compiles on the latest versions of IntelliJ IDEA, and is a bad practice.  Little value was added by using only 1 constant was needed, ACCEPT_ENCODING_
-
  - Notable cleanup & optimization of the Pom.xml
  - Implemented a fix for a possilbe deployment risk when AppName and ResourceGroupName values are not unique with the azure-functions-maven-plugin
    - _As noted here: https://github.com/Azure/azure-functions-java-worker/issues/140_
-
 
 ## Technical Summary:
 This project provides a REST API that recieves a POST body containing a well formed Xsl-FO Xml document ([like these Apache FOP samples](https://github.com/apache/xmlgraphics-fop/tree/trunk/fop/examples/fo/basic)). The service will respond with the rendered Pdf binary (file bytes).

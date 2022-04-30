@@ -187,52 +187,50 @@ Configuration Values:
 ### Snippet:
 Because I talked about follow-through up above, I'd be amiss if I didn't provide a sample implementation of calling this code from .NET.
 
-Assuming the use of the great *RESTSharp library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml)... this sample should get you started on the .NET side as a client calleing the new PDF microservice.
+Assuming the use of the great *Flurl library* for REST api calls, and the Xsl-FO content is validated and parsed as an *XDocument* (Linq2Xml)... this sample should get you started on the .NET side as a client calleing the new PDF microservice.
 
-*NOTE: Just use (RESTSharp)[https://restsharp.dev/] or (Flurl)[https://flurl.dev/] and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
+*NOTE: Just use (Flurl)[https://flurl.dev/] or (RESTSharp)[https://restsharp.dev/] and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
 
-Snippet taken from the [implementation here](https://github.com/cajuncoding/PdfTemplating.XslFO), in my PdfTemplating project but is also readily available as a .NET Client in Nuget -- more details below.
+Here's a very simple client class that will get the job done! But this does not include functionality to handle debugging, viewing the event log which is returned in the response headers (and may be gzipped if large), etc.  Therefore you might be interested in the readily available .NET Client that's available in Nuget -- more details below in the _**.NET Client**_ section.
 
 ```csharp
-using RestSharp;
-using RestSharp.CustomExtensions;
 using System;
-using System.CustomExtensions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+using System.Net.Mime;
+using System.Text;
+using Flurl;
+using Flurl.Http;
 
-namespace PdfTemplating.XslFO.ApacheFOP.Serverless
+namespace PdfTemplating.XslFO.Render.ApacheFOP.Serverless
 {
-    //READ from Configuration, or DI Constructor Injection
-    private string apacheFOPServiceHost = "http://localhost:7071";
-    private string apacheFOPServiceApi = "api/apache-fop/xslfo";
-
-    public static class ApacheFOPServerless
+    public class ApacheFOPServerlessClient
     {
-        public async Task<byte[]> RenderPdfBytesAsync(XDocument xslFODoc)
+        public Uri ApacheFOPServerlessUri { get; protected set; }
+        public string? AzFuncAuthCode { get; protected set; }
+
+        public ApacheFOPServerlessClient(Uri pdfServiceUri, string? azFuncAuthCode = null)
         {
-            //Initialize the Xsl-FO microservice via configuration...
-            var restClient = new RestClient(apacheFOPServiceHost);
+            ApacheFOPServerlessUri = pdfServiceUri;
+            AzFuncAuthCode = azFuncAuthCode;
+        }
 
-            //Get the Raw Xml Source for our Xsl-FO to be tansformed into Pdf binary...
-            var xslFoSource = xslFODoc.ToString();
-
-            //Create the REST request for the Apache FOP micro-service...
-            var restRequest = new RestRequest(apacheFOPServiceApi, Method.POST);
-            restRequest.AddRawTextBody(xslFoSource, ContentType.Xml);
-
-            //Execute the request to the service, validate, and retrieve the Raw Binary resposne...
-            var restResponse = await restClient.ExecuteWithExceptionHandlingAsync(restRequest);
-
-            var pdfBytes = restResponse.RawBytes;
-            return pdfBytes;            
+        public async Task<byte[]> RenderPdfAsync(string xslfoMarkup)
+        {
+            var pdfServiceUrl = ApacheFOPServerlessUri
+                .SetQueryParam("code", AzFuncAuthCode, NullValueHandling.Remove);
+            
+            using var response = await pdfServiceUrl.PostAsync(
+                new StringContent(xslfoMarkup, Encoding.UTF8, MediaTypeNames.Application.Xml)
+            );
+            
+            var pdfBytes = await response.GetBytesAsync();
+            return pdfBytes;
         }
     }
 }
 ```
 
 ### .Net PdfTemplating (Full blown) Sample Implementation & .NET Client:
-A full blown implementation of `Razor Templating + ApacheFOP.Serverless` is my [PdfTemplating.XslFO project here](https://github.com/cajuncoding/PdfTemplating.XslFO).
+A full blown implementation of `Razor Templating + ApacheFOP.Serverless` is available in my [PdfTemplating.XslFO project here](https://github.com/cajuncoding/PdfTemplating.XslFO).
 
 #### .NET Client
 The `PdfTemplating.XslFO` project also provides ready-to-use .NET Client for `ApacheFOP.Serverless` that is readily availalbe in Nuget: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)

@@ -72,7 +72,7 @@ If an error occurs -- likely due to incorrect Xsl-FO syntax or structure -- then
 
 #### Postman Example:
 <p align="center">
-<img src="/postman-test-fonts-fo.png" style="width:auto;height:auto;max-width:1200px;">
+<img src="/postman-test-fonts-fo.png" width="750px">
 </p>
 
 ## Project Overview:

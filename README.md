@@ -3,7 +3,7 @@
 
 When combined with the ease and simplicity of Azure Functions this project is a powerful, efficient, and scalable PDF Reporting Service that generates high quality, true paged media, reports for any environment and any client technology (.Net, NodeJS/JavaScript, Ruby,  Mobile iOS/Android, Powershell, even Windows/Mac apps, etc.)!
 
-You should be able to pull this code down and be up and running quickly & easily with IntelliJ or VS Code (after installing pre-requisites), or even just clone the repo and deploy directly to your Azure Subscription (via GitHub Actions (no local Java needed))[##just-want-it-running-in-azure-and-dont-want-to-bother-with-any-local-installations].
+You should be able to pull this code down and be up and running quickly & easily with IntelliJ or VS Code (after installing pre-requisites), or even just clone the repo and deploy directly to your Azure Subscription (via GitHub Actions with no local Java needed)[#just-want-it-running-in-azure-and-dont-want-to-bother-with-any-local-installations].
 
 If you like this project and/or use it the please give me a Star (c'mon it's free, and it'll make my day)! 
 

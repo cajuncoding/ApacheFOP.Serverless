@@ -3,7 +3,7 @@
 
 When combined with the ease and simplicity of Azure Functions this project is a powerful, efficient, and scalable PDF Reporting Service that generates high quality, true paged media, reports for any environment and any client technology (.Net, NodeJS/JavaScript, Ruby,  Mobile iOS/Android, Powershell, even Windows/Mac apps, etc.)!
 
-You should be able to pull this code down and be up and running quickly & easily with IntelliJ or VS Code (after installing pre-requisites), or even just clone the repo and deploy directly to your Azure Subscription (via GitHub Actions with no local Java needed)[#just-want-it-running-in-azure-and-dont-want-to-bother-with-any-local-installations].
+You should be able to pull this code down and be up and running quickly & easily with IntelliJ or VS Code (after installing pre-requisites), or even just clone the repo and deploy directly to your Azure Subscription [via GitHub Actions with no local Java needed](#just-want-it-running-in-azure-and-dont-want-to-bother-with-any-local-installations).
 
 If you like this project and/or use it the please give me a Star (c'mon it's free, and it'll make my day)! 
 
@@ -191,7 +191,7 @@ Assuming the use of the great *Flurl library* for REST api calls, and the Xsl-FO
 
 *NOTE: Just use (Flurl)[https://flurl.dev/] or (RESTSharp)[https://restsharp.dev/] and avoid [incorrectly implementing HttpClient (hint, it should be a singleton)](https://aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/)*
 
-Here's a very simple client class that will get the job done! But this does not include functionality to handle debugging, viewing the event log which is returned in the response headers (and may be gzipped if large), etc.  Therefore you might be interested in the readily available (.NET Client that's available in Nuget)[https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/] -- more details below in the _**.NET Client**_ section.
+Here's a very simple client class that will get the job done! But this does not include functionality to handle debugging, viewing the event log which is returned in the response headers (and may be gzipped if large), etc.  Therefore you might be interested in the readily available [.NET Client that's available in Nuget](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless) -- more details below in the _**.NET Client**_ section.
 
 ```csharp
 using System;

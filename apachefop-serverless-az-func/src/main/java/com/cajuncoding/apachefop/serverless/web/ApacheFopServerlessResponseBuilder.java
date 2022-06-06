@@ -110,7 +110,7 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 //Safely overwrite the last set of characters with the Truncation Marker...
                 truncatedValue = truncatedValue
                         .substring(0, truncatedValue.length() - TruncationMarker.length())
-                        .concat(truncatedValue);
+                        .concat(TruncationMarker);
 
                 resultValue = truncatedValue;
             }

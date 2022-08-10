@@ -3,14 +3,21 @@ package com.cajuncoding.apachefop.serverless.apachefop;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConstants;
 import com.cajuncoding.apachefop.serverless.utils.ResourceUtils;
+import com.cajuncoding.apachefop.serverless.utils.XPathUtils;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.*;
 import org.apache.fop.configuration.ConfigurationException;
 import org.apache.fop.configuration.DefaultConfigurationBuilder;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
@@ -87,29 +94,40 @@ public class ApacheFopRenderer {
         }
     }
 
+
+
     protected synchronized void initApacheFopFactorySafely() {
         if(staticFopFactory == null) {
             var baseUri = new File(".").toURI();
             var configFilePath = ApacheFopServerlessConstants.ConfigXmlResourceName;
             FopFactory newFopFactory = null;
 
-            try (var configStream = ResourceUtils.loadResourceAsStream(configFilePath);) {
-                if (configStream != null) {
+            try {
+                String configXmlText = ResourceUtils.loadResourceAsString(configFilePath);
+                if (!StringUtils.isBlank(configXmlText)) {
 
                     //When Debugging log the full Configuration file...
                     if(this.apacheFopConfig.isDebuggingEnabled()) {
-                        var configFileXmlText =ResourceUtils.loadResourceAsString(configFilePath);
-                        LogMessage("[DEBUG] ApacheFOP Configuration Xml:".concat(System.lineSeparator()).concat(configFileXmlText));
+                        LogMessage("[DEBUG] ApacheFOP Configuration Xml:".concat(System.lineSeparator()).concat(configXmlText));
                     }
 
                     //Attempt to initialize with Configuration loaded from Configuration XML Resource file...
-                    var cfgBuilder = new DefaultConfigurationBuilder();
-                    var cfg = cfgBuilder.build(configStream);
-
-                    var fopFactoryBuilder = new FopFactoryBuilder(baseUri, fopResourcesFileResolver).setConfiguration(cfg);
-
+                    //NOTE: FOP Factory requires a Stream so we have to initialize a new Stream for it to load from!
+                    FopFactoryBuilder fopFactoryBuilder;
+                    try(var configXmlStream = IOUtils.toInputStream(configXmlText, StandardCharsets.UTF_8)) {
+                        var cfgBuilder = new DefaultConfigurationBuilder();
+                        var cfg = cfgBuilder.build(configXmlStream);
+                        
+                        fopFactoryBuilder = new FopFactoryBuilder(baseUri, fopResourcesFileResolver).setConfiguration(cfg);
+                    }
                     //Ensure Accessibility is programmatically set (default configuration is false)...
-                    //fopFactoryBuilder.setAccessibility(this.apacheFopConfig.isAccessibilityPdfRenderingEnabled());
+                    //NOTE: There appears to be a bug in ApacheFOP code or documentation whereby it does not load the value from Xml as defined in the Docs!
+                    //      to work around this we read the value ourselves and also provide convenience support to simply set it in Azure Functions Configuration
+                    //      and if either configuration value is true then it will be enabled.
+                    //NOTE: The XPathUtils is null safe so any issues in loading/parsing will simply result in null or default values...
+                    var configXml = XPathUtils.fromXml(configXmlText);
+                    var isAccessibilityEnabledInXmlConfig = configXml.evalXPathAsBoolean("//fop/accessibility", false);
+                    fopFactoryBuilder.setAccessibility(this.apacheFopConfig.isAccessibilityPdfRenderingEnabled() || isAccessibilityEnabledInXmlConfig);
 
                     newFopFactory = fopFactoryBuilder.build();
                 }

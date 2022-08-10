@@ -23,6 +23,9 @@
     <!-- All fonts information that has been gathered as a result of "directory" or "auto-detect" font configurations will be cached for future rendering runs.-->
     <use-cache>true</use-cache>
 
+    <!-- Enable Accessibility as noted in Apache FOP Docs; NOTE: There is a Bug where this isn't loaded but we now manually support this! -->
+    <accessibility>false</accessibility>
+
     <renderers>
         <renderer mime="application/pdf">
             <!-- Enable this to turn on Accessibility Support...

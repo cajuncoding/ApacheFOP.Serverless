@@ -1,7 +1,8 @@
 package com.cajuncoding.apachefop.serverless.web;
 
 import com.cajuncoding.apachefop.serverless.http.HttpEncodings;
-import com.cajuncoding.apachefop.serverless.utils.TextUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -19,10 +20,10 @@ public class SafeHeader {
     public String getValue() { return value; }
 
     protected String sanitizeTextForHttpHeader(String value, String encoding) throws UnsupportedEncodingException {
-        if(TextUtils.isNullOrWhiteSpace(value))
+        if(StringUtils.isBlank(value))
             return value;
 
-        if(encoding != null && encoding != HttpEncodings.IDENTITY_ENCODING)
+        if(StringUtils.isNotBlank(encoding) && !encoding.equalsIgnoreCase(HttpEncodings.IDENTITY_ENCODING))
             return value;
 
         //BBernard - 09/29/2021

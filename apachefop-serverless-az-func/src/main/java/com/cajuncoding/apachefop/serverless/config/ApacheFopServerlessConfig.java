@@ -83,7 +83,7 @@ public class ApacheFopServerlessConfig {
 
         //Determine if Event Log Dump mode is enabled (vs PDF Binary return).
         this.eventLogDumpModeEnabled = BooleanUtils.toBoolean(
-                queryParams.getOrDefault(ApacheFopServerlessQueryParams.EventLogDump, null)
+            queryParams.getOrDefault(ApacheFopServerlessQueryParams.EventLogDump, null)
         );
 
     }

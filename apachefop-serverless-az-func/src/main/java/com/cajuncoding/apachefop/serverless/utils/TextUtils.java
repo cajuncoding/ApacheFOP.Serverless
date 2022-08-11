@@ -18,10 +18,6 @@ public class TextUtils {
         return currentW3cDateTime;
     }
 
-    public static boolean isNullOrWhiteSpace(String value) {
-        return value == null || value.isBlank();
-    }
-
     /**
      * Truncates a string to the number of characters that fit in X bytes avoiding multi byte characters being cut in
      * half at the cut off point. Also handles surrogate pairs where 2 characters in the string is actually one literal

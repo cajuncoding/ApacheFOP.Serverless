@@ -10,9 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.*;
 import org.apache.fop.configuration.ConfigurationException;
 import org.apache.fop.configuration.DefaultConfigurationBuilder;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
@@ -94,8 +92,6 @@ public class ApacheFopRenderer {
         }
     }
 
-
-
     protected synchronized void initApacheFopFactorySafely() {
         if(staticFopFactory == null) {
             var baseUri = new File(".").toURI();
@@ -104,7 +100,7 @@ public class ApacheFopRenderer {
 
             try {
                 String configXmlText = ResourceUtils.loadResourceAsString(configFilePath);
-                if (!StringUtils.isBlank(configXmlText)) {
+                if (StringUtils.isNotBlank(configXmlText)) {
 
                     //When Debugging log the full Configuration file...
                     if(this.apacheFopConfig.isDebuggingEnabled()) {

@@ -7,7 +7,7 @@ public class ApacheFopRenderResult {
     private final ApacheFopEventListener eventListener;
 
     public ApacheFopRenderResult(byte[] pdfBytes, ApacheFopEventListener eventListener) {
-        this.pdfBytes = pdfBytes;
+        this.pdfBytes = pdfBytes != null ? pdfBytes : new byte[0];
         this.eventListener = eventListener;
     }
 

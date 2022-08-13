@@ -16,6 +16,13 @@ then I do love-me-some-coffee!*
 </a> 
 
 ## Updates / Change Log
+
+##### Updated the project to v1.5 with the following:
+ - Add support to read the Accessibility flag correctly from ApacheFOP configuration as noted in the documentation; a bug exists where the value is not loaded so we manually support this now in a way that is fully compliant with the documentation. 
+   - The original support from Azure Function configuration (environment variable) is still supported also.
+ - Several small code improvements for consistency
+ - Additional debugging log added to better know if rendering process was completed (e.g. logs SUCCESS along with Pdf Byte Size).
+
 ##### Updated the project to v1.4 with the following:
  - **Added support for running, debugging, and deploying from within VS Code as well as IntelliJ IDEA**.
    - Both project types use folder context configuration, so all configuration files have now been included and checked into the Repository.

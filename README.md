@@ -5,6 +5,7 @@ When combined with the ease and simplicity of Azure Functions this project is a 
 
 You should be able to pull this code down and be up and running quickly & easily with IntelliJ or VS Code (after installing pre-requisites), or even just clone the repo and deploy directly to your Azure Subscription [via GitHub Actions with no local Java needed](#just-want-it-running-in-azure-and-dont-want-to-bother-with-any-local-installations).
 
+### Give Star 🌟
 **If you like this project and/or use it the please give it a Star 🌟 (c'mon it's free, and it'll help others find the project)!**
 
 ### [Buy me a Coffee ☕](https://www.buymeacoffee.com/cajuncoding)

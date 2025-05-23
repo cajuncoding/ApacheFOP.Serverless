@@ -3,20 +3,18 @@
     <option name="appName" />
     <option name="appServicePlanName" />
     <option name="appServicePlanResourceGroup" />
-    <option name="appSettings">
-      <map />
-    </option>
     <option name="appSettingsKey" value="60329852-dd47-4b25-8168-2ed01d6ac893" />
     <option name="artifact" />
     <option name="debugOptions" />
     <option name="deployment" />
     <option name="deploymentStagingDirectoryPath" />
-    <option name="funcPath" value="C:\Program Files\nodejs\node_modules\azure-functions-core-tools\bin\func.exe" />
-    <option name="hostJsonPath" value="D:\Develop\Personal.GitHub\ApacheFOP.Serverless.AzureFunctions\github\apachefop-serverless-az-func\host.json" />
+    <option name="funcPath" value="C:\Program Files\Microsoft\Azure Functions Core Tools\func.exe" />
+    <option name="functionHostArguments" value="host start --port 63295" />
+    <option name="hostJsonPath" value="$PROJECT_DIR$/host.json" />
     <option name="insightsName" />
     <option name="instrumentationKey" />
     <option name="javaVersion" />
-    <option name="localSettingsJsonPath" />
+    <option name="localSettingsJsonPath" value="$PROJECT_DIR$/local.settings.json" />
     <option name="moduleName" value="apachefop-serverless-az-func" />
     <option name="os" />
     <option name="pricingTier" />

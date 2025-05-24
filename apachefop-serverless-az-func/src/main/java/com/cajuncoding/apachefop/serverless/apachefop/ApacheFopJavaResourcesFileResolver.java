@@ -57,7 +57,7 @@ public class ApacheFopJavaResourcesFileResolver implements ResourceResolver {
 
         //Use cached results from our Concurrent HashMap cached data if possible!
         var resourceBytes = javaResourceFileCache.computeIfAbsent(uri, key -> {
-            //Map the requested Uri to the base application path to determine it's relative path as a Resource!
+            //Map the requested Uri to the base application path to determine its relative path as a Resource!
             try {
                 var mappedPath = ResourceUtils.MapServerPath(requestPath);
                 

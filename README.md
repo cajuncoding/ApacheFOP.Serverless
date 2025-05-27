@@ -18,10 +18,24 @@ then I do love-me-some-coffee!*
 
 ## Updates / Change Log
 
+##### Updated the project to v1.6 with the following:
+- Updated Apache FOP to v2.11 (latest as of 2025-05-20).
+- Update to now use Java Azure Functions v4 (v3 is fully deprecated by end of 2022).
+- Updated Java to latest supported version Java v21 ([Using Azul Zulu OpenJDK](https://www.azul.com/downloads/?version=java-21-lts&package=jdk#zulu)).
+- Updated all other packages to latest stable versions.
+- Upgraded project `apachefop-serverless-az-func.iml` to IntelliJ 2025 Community.
+- Resolved bug/breaking issue with `ApacheFopJavaResourcesFileResolver` not being used in v2.11 when calling `FopFactoryBuilder.setConfiguration()` (as it was in FOP v2.6).
+  - The new version of FOP upgraded from FOP v2.6 to v2.11 introduced a bug (breaking issue) where the `ResourceResolver` injected to the constrcutor of `FopFactoryBuilder` is not honored resulting in embedded Fonts (java resources) no longer being resolved.
+  - The custom resolver is lost when calling `FopFactoryBuilder.setConfiguration()`, whereby the code now instantiates a default resource resover that is actually passed to the `FontManager` instead of the resource resolver we provided in the constructor.
+  - This worked fine in Fop v2.6 (and maybe other versions).
+  - The resolution is to initialize `FopFactoryBuilder` differently now by parsing the configuration directly from the `Stream` using `FopConfParser` which allows us to provide the `ApacheFopJavaResourcesFileResolver` into it's constructor instead (that is then correctly honored).
+    - We are then able to call `FopConfParsergetFopFactoryBuilder()` to get the fully initialize `FopFactoryBuilder` from the `FopConfParser`.
+    - Everything works as expected after that!
+
 ##### Updated the project to v1.5 with the following:
  - Add support to read the Accessibility flag correctly from ApacheFOP configuration as noted in the documentation; a bug exists where the value is not loaded so we manually support this now in a way that is fully compliant with the documentation. 
    - The original support from Azure Function configuration (environment variable) is still supported also.
- - Several small code improvements for consistency
+ - Several small code improvements for consistency.
  - Additional debugging log added to better know if rendering process was completed (e.g. logs SUCCESS along with Pdf Byte Size).
 
 ##### Updated the project to v1.4 with the following:
@@ -30,7 +44,7 @@ then I do love-me-some-coffee!*
    - This should make it easier to get up and running quickly with either IDE.
  - Resolved a bug in the Font loading/path handling when running in Windows Host (due to existing font paths).
  - Updated Microsoft's `azure-functions-maven-plugin` to address various issues (esp. the need for a GUID in the deployment name which broke VS Code's ability to debug).
- - Pom.xml cleanup to eliminate various "*Problems*" flagged by VS Code's pom parsing (using M2Eclipse processor
+ - Pom.xml cleanup to eliminate various "*Problems*" flagged by VS Code's pom parsing (using M2Eclipse processor).
  - Various small code cleanup items as noted in VS Code Java "*Problems*" tab.
  
 ##### Updated the project to v1.3 with the following:
@@ -148,6 +162,19 @@ If you'd rather just deploy directly to Azure, then there's some info on using G
 ## Additional Features:
 
 ### GZIP Compression:
+
+#### Request Compression:
+Since some reports may be quite large XSL-FO sources you can submit them with GZIP compression to reduce the size of the request payload.
+This is especially useful for large reports with lots of text content, as the text tends to be more compressible than binary data.
+
+To do this you should post the payload to the `/api/apache-fop/gzip` endpoint (insetead of the default `/api/apache-fop/xslfo` which expects `String` inputs) which expectes a GZIP compressed Byte Array (`Byte[]`) content body on the request.
+
+This is already completely supported, and handled for you, when using the .NET Client available in Nuget and discussed in more detail below 👇: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/).
+
+**NOTE:** The reason that we have two distinct/separate endpoints is because it allows us to optimize the endpoints using Azure Funcitons default binding and ensures we are using any optimizations that Microsoft may provide
+ for different kinds of input bindings (`String` vs `Byte Array`) -- improving performance & minimizing any risk of double encoding/de-coding of large content body reqeusts, unnecessary memory utilizaiton, streaming optimizations, etc..
+
+ ### Response Compression
 In addition to rendering the PDF, this service already implements GZIP compression for returning the Binary PDF files. This can greatly improve performance and download times, especially for PDFs rendered without much imagery, as the text content bytes tends to be more compressible.
 
 All you need to do is add the `Accept-Encoding` header with a value of `gzip` to the request:
@@ -241,7 +268,7 @@ namespace PdfTemplating.XslFO.Render.ApacheFOP.Serverless
 A full blown implementation of `Razor Templating + ApacheFOP.Serverless` is available in my [PdfTemplating.XslFO project here](https://github.com/cajuncoding/PdfTemplating.XslFO).
 
 #### .NET Client
-The `PdfTemplating.XslFO` project also provides ready-to-use .NET Client for `ApacheFOP.Serverless` that is readily availalbe in Nuget: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)
+The `PdfTemplating.XslFO` project also provides ready-to-use .NET Client for `ApacheFOP.Serverless` that is readily available in Nuget: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/)
 
 It illustrates the use of both Xslt and/or Razor templates from ASP.Net MVC to render PDF Binary reports dynamically from queries to the [Open Movie Database API](http://www.omdbapi.com/). And it has now been enhanced to also illustrate the use of _ApacehFOP.Serverless_ microservice for rendering instead of the embedded legacy FO.Net implementation.
 

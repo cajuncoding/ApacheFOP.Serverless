@@ -169,6 +169,10 @@ This is especially useful for large reports with lots of text content, as the te
 
 To do this you should post the payload to the `/api/apache-fop/gzip` endpoint (insetead of the default `/api/apache-fop/xslfo` which expects `String` inputs) which expectes a GZIP compressed Byte Array (`Byte[]`) content body on the request.
 
+In addition the following Headerss should be correctly specified on the Request:
+- `Content-Encoding`: `gzip`
+- `Content-Type`: `application/octet-stream`
+
 This is already completely supported, and handled for you, when using the .NET Client available in Nuget and discussed in more detail below 👇: [PdfTemplating.XslFO.Render.ApacheFOP.Serverless](https://www.nuget.org/packages/PdfTemplating.XslFO.Render.ApacheFOP.Serverless/).
 
 **NOTE:** The reason that we have two distinct/separate endpoints is because it allows us to optimize the endpoints using Azure Funcitons default binding and ensures we are using any optimizations that Microsoft may provide

@@ -24,9 +24,7 @@ public class ApacheFopGzipFunction {
         try {
 
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();
-            var response = functionExecutor.ExecuteByteArrayRequest(request, context.getLogger());
-
-            return response;
+            return functionExecutor.ExecuteByteArrayRequest(request, context.getLogger());
         }
         catch (Exception ex) {
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body(ex).build();

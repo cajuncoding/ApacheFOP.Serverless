@@ -24,9 +24,7 @@ public class ApacheFopFunction {
         try {
 
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();
-            var response = functionExecutor.ExecuteStringRequest(request, context.getLogger());
-
-            return response;
+            return functionExecutor.ExecuteStringRequest(request, context.getLogger());
         }
         catch (Exception ex) {
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body(ex).build();

@@ -23,16 +23,17 @@ target/
 hs_err_pid*
 
 # IDE
-.idea/
+#.idea/
 # *.iml
-.settings/
-.project
-.classpath
+#.settings/
+#.project
+#.classpath
 
 # macOS
 .DS_Store
 
 # Azure Functions
-local.settings.json
+#local.settings.json
+.azure/
 bin/
 obj/

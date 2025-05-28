@@ -9,7 +9,7 @@
     <option name="deployment" />
     <option name="deploymentStagingDirectoryPath" />
     <option name="funcPath" value="C:\Program Files\Microsoft\Azure Functions Core Tools\func.exe" />
-    <option name="functionHostArguments" value="host start --port 63295" />
+    <option name="functionHostArguments" value="host start --port 7071" />
     <option name="hostJsonPath" value="$PROJECT_DIR$/host.json" />
     <option name="insightsName" />
     <option name="instrumentationKey" />

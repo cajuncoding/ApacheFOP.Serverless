@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "java",
+    "FUNCTIONS_EXTENSION_VERSION": "~4",
+    "FUNCTIONS_CORE_TOOLS_DISPLAY_LOGO": "true",
+    "JAVA_HOME": "C:\\Program Files\\Zulu\\zulu-21\\",
+    "KeepWarmCronSchedule": "0 */5 * * * *",
+    "AccessibilityEnabled": "false",
+    "DebuggingEnabled": "false"
+  },
+  "ConnectionStrings": {}
+}

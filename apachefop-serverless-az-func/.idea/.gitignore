@@ -1,5 +1,6 @@
 # Default ignored files
-/azure
+azure/
+libraries/
 /shelf/
 /workspace.xml
 azureSettings.xml

@@ -1,8 +1,6 @@
 {
   "IsEncrypted": false,
   "Values": {
-    //Be sure to install the Azurite emulator (Azure Storage Emulator) to support Timer Triggers, etc.
-    //For more info see: https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator#get-the-storage-emulator
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "java",
     "FUNCTIONS_EXTENSION_VERSION": "~4",

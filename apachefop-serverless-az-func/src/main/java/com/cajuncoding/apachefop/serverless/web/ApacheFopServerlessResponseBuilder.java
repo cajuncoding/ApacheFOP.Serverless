@@ -60,7 +60,6 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 .createResponseBuilder(HttpStatus.OK)
                 .body(fopPdfBytes)
                 .header(HttpHeaders.CONTENT_TYPE, MimeConstants.MIME_PDF)
-                .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(fopPdfBytes.length))
                 .header(HttpHeaders.CONTENT_DISPOSITION, MessageFormat.format("inline; filename=\"{0}\"", fileName))
                 .header(ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_EVENTLOG_ENCODING, eventLogSafeHeaderValue.getEncoding())
                 .header(ApacheFopServerlessHeaders.APACHEFOP_SERVERLESS_EVENTLOG, eventLogSafeHeaderValue.getValue())
@@ -83,7 +82,6 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 .createResponseBuilder(HttpStatus.OK)
                 .body(eventLogText)
                 .header(HttpHeaders.CONTENT_TYPE, MimeConstants.MIME_PLAIN_TEXT)
-                .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(eventLogText.length()))
                 .build();
 
         return response;

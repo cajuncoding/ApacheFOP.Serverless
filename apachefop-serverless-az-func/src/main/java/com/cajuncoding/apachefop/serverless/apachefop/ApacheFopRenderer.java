@@ -5,11 +5,13 @@ import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConstants;
 import com.cajuncoding.apachefop.serverless.utils.ResourceUtils;
 import com.cajuncoding.apachefop.serverless.utils.XPathUtils;
 
+import com.cajuncoding.apachefop.serverless.utils.XmlFactoryUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.*;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
@@ -30,7 +32,11 @@ public class ApacheFopRenderer {
 
     //TransformerFactory may be re-used as a singleton as long as it's never mutated/modified directly by
     //  more than one thread (e.g. configuration changes on the Factory class).
-    private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    // Explicitly Opt-in to Safe processing by enabling secure processing & Block external DTDs & stylesheets!
+    // NOTE: Even though XXE vulnerabilities were patched inside some of the FOP internal handling after FOP v2.10
+    //      this was still an issue for Java in general which is vulnerable by default and therefor our TransformerFactory
+    //      must be explicitly set to securely process the XML itself -- it is NOT safe from XXE by default (ugg)!
+    private static final TransformerFactory transformerFactory = XmlFactoryUtils.newXxeSafeTransformerFactory();
 
     private Logger logger = null;
     private ApacheFopServerlessConfig apacheFopConfig = null;

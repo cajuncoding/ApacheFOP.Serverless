@@ -46,26 +46,34 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 ? "<no message>"
                 : ex.getMessage();
 
-        final int maxFrames = 10;
-        StackTraceElement[] trace = ex.getStackTrace();
-        int statckTracelimit = Math.min(maxFrames, trace.length);
-
         StringBuilder body = new StringBuilder(512)
                 .append("Timestamp: ").append(timestamp).append(StringUtils.LF)
                 .append("Exception: ").append(ex.getClass().getName()).append(StringUtils.LF)
-                .append("Message: ").append(message).append(StringUtils.LF)
-                .append("StackTrace (top ").append(statckTracelimit).append("):").append(StringUtils.LF);
+                .append("Message: ").append(message).append(StringUtils.LF);
 
-        for (int i = 0; i < statckTracelimit; i++) {
-            body.append("  at ").append(trace[i]).append(StringUtils.LF);
-        }
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        if(ex instanceof IllegalArgumentException)
+            httpStatus = HttpStatus.BAD_REQUEST;
 
-        if (trace.length > statckTracelimit) {
-            body.append("  ... ").append(trace.length - statckTracelimit).append(" more").append(StringUtils.LF);
+        //ONLY provide Stack Trace help if the error is an internal server error (unexpected exception)!
+        if(httpStatus == HttpStatus.INTERNAL_SERVER_ERROR) {
+            final int maxFrames = 10;
+            StackTraceElement[] trace = ex.getStackTrace();
+            int stackTracelimit = Math.min(maxFrames, trace.length);
+
+            body.append("StackTrace (top ").append(stackTracelimit).append("):").append(StringUtils.LF);
+
+            for (int i = 0; i < stackTracelimit; i++) {
+                body.append("  at ").append(trace[i]).append(StringUtils.LF);
+            }
+
+            if (trace.length > stackTracelimit) {
+                body.append("  ... ").append(trace.length - stackTracelimit).append(" more").append(StringUtils.LF);
+            }
         }
 
         return request
-                .createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
+                .createResponseBuilder(httpStatus)
                 .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.PLAIN_TEXT_UTF8)
                 .body(body.toString())
                 .build();

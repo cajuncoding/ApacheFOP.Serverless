@@ -9,11 +9,13 @@ import com.cajuncoding.apachefop.serverless.utils.XmlFactoryUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.*;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
 
-import javax.xml.transform.*;
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
@@ -31,13 +33,13 @@ public class ApacheFopRenderer {
     private static volatile FopFactory staticFopFactory = null;
     private static final Object FOP_INITIALIZATION_LOCK = new Object();
 
-    //TransformerFactory may be re-used as a singleton as long as it's never mutated/modified directly by
+    //SAXParserFactory may be re-used as a singleton as long as it's never mutated/modified directly by
     //  more than one thread (e.g. configuration changes on the Factory class).
     // Explicitly Opt-in to Safe processing by enabling secure processing & Block external DTDs & stylesheets!
     // NOTE: Even though XXE vulnerabilities were patched inside some of the FOP internal handling after FOP v2.10
-    //      this was still an issue for Java in general which is vulnerable by default and therefor our TransformerFactory
+    //      this was still an issue for Java in general which is vulnerable by default and therefor our XML parsing
     //      must be explicitly set to securely process the XML itself -- it is NOT safe from XXE by default (ugg)!
-    private static final TransformerFactory transformerFactory = XmlFactoryUtils.newXxeSafeTransformerFactory();
+    private static final SAXParserFactory saxXmlParserFactory = XmlFactoryUtils.newXxeSafeSaxXmlParserFactory();
 
     private Logger logger = null;
     private ApacheFopServerlessConfig apacheFopConfig = null;
@@ -52,49 +54,58 @@ public class ApacheFopRenderer {
         this.logger = optionalLogger;
     }
 
-    public ApacheFopRenderResult renderPdfResult(String xslFOSource, boolean gzipEnabled) throws IOException, TransformerException, FOPException {
-        //We want to manage the output in memory to eliminate any overhead or risks of using the file-system
-        //  (e.g. file cleanup, I/O issues, etc.).
+    public ApacheFopRenderResult renderPdfResult(String xslFOSource, boolean gzipEnabled) throws IOException, FOPException {
+        //If GZIP is enabled then wrap the core ByteArrayOutputStream as a GZIP compression output stream...
         try (
+            //We want to manage the output in memory to eliminate any overhead or risks of using the file-system (e.g. file cleanup, I/O issues, etc.).
             ByteArrayOutputStream pdfBaseOutputStream = new ByteArrayOutputStream();
-            //If GZIP is enabled then wrap the core ByteArrayOutputStream as a GZIP compression output stream...
-            OutputStream fopOutputStream = (gzipEnabled) ? new GZIPOutputStream(pdfBaseOutputStream) : pdfBaseOutputStream;
+            OutputStream fopOutputStream = gzipEnabled ? new GZIPOutputStream(pdfBaseOutputStream) : pdfBaseOutputStream
         ) {
             //Ensure we are ALWAYS fully initialized...
-            var fopFactoryInstance = initApacheFopFactorySafely();
+            FopFactory fopFactory = initApacheFopFactorySafely();
 
             //Enable the Event Listener for capturing Logging details (e.g. parsing/processing Events)...
-            var eventListener = new ApacheFopEventListener(logger);
-            FOUserAgent foUserAgent = fopFactoryInstance.newFOUserAgent();
+            ApacheFopEventListener eventListener = new ApacheFopEventListener(logger);
+            FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
             foUserAgent.getEventBroadcaster().addEventListener(eventListener);
 
             //In order to transform the input source into the Binary Pdf output we must initialize a new
-            //  Fop (i.e. Formatting Object Processor), and a new Xsl Transformer that executes the transform.
+            //  Fop (i.e. Formatting Object Processor) and pipe our XslFO Xml directly into FOP with SAX for
+            //  best performance.
+            //  NOTE: This is now using a fully streaming (SAX) pipeline — NO DOM is built and NO identity transform hop.
             //  NOTE: Apache FOP uses the event based XSLT processing engine from SAX for optimized processing;
             //          this means that the transformer crawls the Xml tree of the XSL-FO source xml, while
             //          Fop is just processing events as they are raised by the transformer.  This is efficient
             //          because the Xml tree is only processed 1 time which aids in optimizing both performance
             //          and memory utilization.
-            Fop fop = fopFactoryInstance.newFop(MimeConstants.MIME_PDF, foUserAgent, fopOutputStream);
-            Transformer transformer = transformerFactory.newTransformer();
+            Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, fopOutputStream);
 
-            try (StringReader stringReader = new StringReader(xslFOSource)) {
-                //The Transformer requires both source (input) and result (output) handlers...
-                Source src = new StreamSource(stringReader);
-                Result res = new SAXResult(fop.getDefaultHandler());
+            try (Reader xslFoInputReader = new StringReader(xslFOSource)) {
+                // Fully streaming SAX-only pipeline: parser → FOP handler → fopOutputStream (initialize above!)
+                XMLReader saxXmlReader = saxXmlParserFactory.newSAXParser().getXMLReader();
+                saxXmlReader.setContentHandler(fop.getDefaultHandler());
 
-                //Finally we can execute the transformation!
-                transformer.transform(src, res);
+                InputSource saxInputSource = new InputSource(xslFoInputReader);
+                saxXmlReader.parse(saxInputSource);
+            }
+            //Treat ParserConfigurationException as internal misconfiguration and convert to an unchecked exception.
+            catch (ParserConfigurationException e) {
+                logUnexpectedException(e);
+                throw new RuntimeException(e);
+            }
+            catch (SAXParseException e) {
+                throw XmlFactoryUtils.newBadXmlRequestException(e);
+            }
+            catch (SAXException e) {
+                throw XmlFactoryUtils.newBadXmlRequestException(e);
             }
 
-            //We must flush & close the stream (especially if GZIP is enabled) to ensure the outputs are finalized...
-            fopOutputStream.flush();
-            fopOutputStream.close();
+            //FINALLY if GZIP is Enabled we must finish the stream (e.g. flush & close) to ensure the output is finalized...
+            if (gzipEnabled) {
+                ((GZIPOutputStream) fopOutputStream).finish();
+            }
 
-            //Once complete we now a binary stream that we can most easily return to the client
-            //  as a byte array of binary data...
-            byte[] pdfBytes = pdfBaseOutputStream.toByteArray();
-            return new ApacheFopRenderResult(pdfBytes, eventListener);
+            return new ApacheFopRenderResult(pdfBaseOutputStream.toByteArray(), eventListener);
         }
     }
 
@@ -165,7 +176,7 @@ public class ApacheFopRenderer {
 
                 } catch (SAXException e) {
                     //DO NOTHING if Configuration is Invalid; log info. for troubleshooting.
-                    logUnexpectedException(configFilePath, e);
+                    logUnexpectedConfigException(configFilePath, e);
                 }
 
                 if (fopFactoryBuilder != null) {
@@ -183,7 +194,7 @@ public class ApacheFopRenderer {
             }
         } catch (IOException e) {
             //DO NOTHING if Configuration is Invalid; log info. for troubleshooting.
-            logUnexpectedException(configFilePath, e);
+            logUnexpectedConfigException(configFilePath, e);
         }
 
         //If not loaded with Configuration we still safely Initialize will All DEFAULTS, as well as our custom Resource Resolver...
@@ -195,7 +206,7 @@ public class ApacheFopRenderer {
         return newFopFactory;
     }
 
-    private void logUnexpectedException(String configFilePath, Exception exc)
+    private void logUnexpectedConfigException(String configFilePath, Exception exc)
     {
         var message = MessageFormat.format(
             "An Exception occurred loading the Configuration file [{0}]; {1}",
@@ -203,8 +214,19 @@ public class ApacheFopRenderer {
             exc.getMessage()
         );
 
-        System.out.println(message);
-        if (logger != null) logger.log(Level.SEVERE, message, exc);
+        logUnexpectedException(exc, message);
+    }
+
+    private void logUnexpectedException(Exception exc)
+    {
+        logUnexpectedException(exc, null);
+    }
+
+    private void logUnexpectedException(Exception exc, String message)
+    {
+        String msg = message == null ? exc.getMessage() : message;
+        System.out.println(msg);
+        if (logger != null) logger.log(Level.SEVERE, msg, exc);
     }
 
     protected void LogMessage(String message)

@@ -17,8 +17,9 @@ import org.apache.fop.apps.MimeConstants;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class ApacheFopServerlessResponseBuilder<TRequest> {
@@ -39,43 +40,58 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
     }
 
     public HttpResponseMessage buildExceptionResponse(Exception ex) {
-        String timestamp = OffsetDateTime.now()
-                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        String timestampUtc = Instant.now().toString();
+
+        String exceptionType = ex.getClass().getSimpleName();
+        if(exceptionType.isBlank())
+            exceptionType = "UnknownException";
+
+        String className = ex.getClass().getName();
 
         String message = (ex.getMessage() == null || ex.getMessage().isBlank())
-                ? "<no message>"
+                ? StringUtils.EMPTY
                 : ex.getMessage();
 
-        StringBuilder body = new StringBuilder(512)
-                .append("Timestamp: ").append(timestamp).append(StringUtils.LF)
-                .append("Exception: ").append(ex.getClass().getName()).append(StringUtils.LF)
-                .append("Message: ").append(message).append(StringUtils.LF);
+        String detailMessage = MessageFormat.format("[{0}] {1}", exceptionType, message);
 
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         if(ex instanceof IllegalArgumentException)
             httpStatus = HttpStatus.BAD_REQUEST;
 
+        //NOTE: WE use LinkedHashMap to preserve the ordering of the properties in the serialized Json output...
+        Map<String, Object> responseMap = new LinkedHashMap<>();
+        responseMap.put("httpStatusCode", httpStatus.value());
+        responseMap.put("httpStatus", httpStatus.name());
+        responseMap.put("timestampUtc", timestampUtc);
+        responseMap.put("exceptionType", exceptionType);
+        responseMap.put("className", className);
+        responseMap.put("message", message);
+        responseMap.put("detailMessage", detailMessage);
+
         //ONLY provide Stack Trace help if the error is an internal server error (unexpected exception)!
         if(httpStatus == HttpStatus.INTERNAL_SERVER_ERROR) {
             final int maxFrames = 10;
             StackTraceElement[] trace = ex.getStackTrace();
-            int stackTracelimit = Math.min(maxFrames, trace.length);
+            int stackTraceLimit = Math.min(maxFrames, trace.length);
 
-            body.append("StackTrace (top ").append(stackTracelimit).append("):").append(StringUtils.LF);
+            StringBuilder stackTraceBuilder = new StringBuilder();
+            stackTraceBuilder.append("StackTrace (top ").append(stackTraceLimit).append("):").append(StringUtils.LF);
 
-            for (int i = 0; i < stackTracelimit; i++) {
-                body.append("  at ").append(trace[i]).append(StringUtils.LF);
+            for (int i = 0; i < stackTraceLimit; i++) {
+                stackTraceBuilder.append("  at ").append(trace[i]).append(StringUtils.LF);
             }
 
-            if (trace.length > stackTracelimit) {
-                body.append("  ... ").append(trace.length - stackTracelimit).append(" more").append(StringUtils.LF);
+            if (trace.length > stackTraceLimit) {
+                stackTraceBuilder.append("  ... ").append(trace.length - stackTraceLimit).append(" more").append(StringUtils.LF);
             }
+
+            responseMap.put("stackTrace", stackTraceBuilder.toString());
         }
 
         return request
                 .createResponseBuilder(httpStatus)
-                .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.PLAIN_TEXT_UTF8)
-                .body(body.toString())
+                .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.JSON)
+                .body(responseMap)
                 .build();
     }
 

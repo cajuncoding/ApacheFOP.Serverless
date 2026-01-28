@@ -99,7 +99,7 @@ public class XmlFactoryUtils {
        // Add useful context (line/column) for callers/logs; rethrow as IllegalArgumentException
         return new IllegalArgumentException(
                 MessageFormat.format(
-                    "Invalid XSL-FO at line [{0}], column [{1}]: {2}",
+                    "Invalid XSL-FO at line [{0}], column [{1}]{2}",
                     saxParseException.getLineNumber(),
                     saxParseException.getColumnNumber(),
                     (saxParseException.getMessage() != null ? ": " + saxParseException.getMessage() : StringUtils.EMPTY)

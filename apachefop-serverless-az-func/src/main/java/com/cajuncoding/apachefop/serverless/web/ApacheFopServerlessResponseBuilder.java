@@ -1,6 +1,7 @@
 package com.cajuncoding.apachefop.serverless.web;
 
 import com.cajuncoding.apachefop.serverless.apachefop.ApacheFopRenderResult;
+import com.cajuncoding.apachefop.serverless.http.HttpContentTypes;
 import com.cajuncoding.apachefop.serverless.utils.GzipUtils;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessHeaders;
@@ -10,6 +11,7 @@ import com.cajuncoding.apachefop.serverless.utils.TextUtils;
 import com.microsoft.azure.functions.HttpRequestMessage;
 import com.microsoft.azure.functions.HttpResponseMessage;
 import com.microsoft.azure.functions.HttpStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fop.apps.MimeConstants;
 
 import java.io.IOException;
@@ -18,7 +20,7 @@ import java.text.MessageFormat;
 import java.util.Optional;
 
 public class ApacheFopServerlessResponseBuilder<TRequest> {
-    public final String TruncationMarker = " . . . (TRUNCATED!)";
+    public static final String TRUNCATION_MARKER = " . . . (TRUNCATED!)";
 
     private HttpRequestMessage<Optional<TRequest>> request;
 
@@ -27,14 +29,23 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
     }
 
     public HttpResponseMessage BuildBadXslFoBodyResponse() {
-        var response = request
+        return request
                 .createResponseBuilder(HttpStatus.BAD_REQUEST)
+                .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.PLAIN_TEXT_UTF8)
                 .body("A valid XSL-FO body content must be specified.")
                 .build();
-
-        return response;
     }
 
+    public HttpResponseMessage buildExceptionResponse(Exception ex) {
+        var errorMessageBody = "Internal error: " + ex.getClass().getSimpleName() +
+                " - " + (ex.getMessage() == null ? "" : ex.getMessage());
+
+        return request
+                .createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
+                .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.PLAIN_TEXT_UTF8)
+                .body(errorMessageBody)
+                .build();
+    }
     public HttpResponseMessage BuildPdfResponse(
             ApacheFopRenderResult pdfRenderResult,
             ApacheFopServerlessConfig config
@@ -46,7 +57,7 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 ? pdfRenderResult.getEventsLogAsHeaderValue()
                 : "Disabled by AzureFunctions 'DebuggingEnabled' configuration Setting.";
 
-        //Lets create a unique filename -- because that's helpful to the client...
+        //Let's create a unique filename -- because that's helpful to the client...
         String fileName = TextUtils.getCurrentW3cDateTime().concat("_RenderedPdf.pdf");
 
         String contentEncoding = config.isGzipResponseEnabled()
@@ -80,40 +91,50 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
         //Build the Http Response for the Client!
         HttpResponseMessage response = request
                 .createResponseBuilder(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.PLAIN_TEXT_UTF8)
                 .body(eventLogText)
-                .header(HttpHeaders.CONTENT_TYPE, MimeConstants.MIME_PLAIN_TEXT)
                 .build();
 
         return response;
     }
 
     public SafeHeader CreateSafeHeaderValue(String headerValue, int maxHeaderBytesSize) throws IOException {
+        if(headerValue == null)
+            return new SafeHeader(StringUtils.EMPTY, HttpEncodings.IDENTITY_ENCODING);
+
         String resultEncoding = HttpEncodings.IDENTITY_ENCODING;
-        String resultValue = null;
+        String resultValue = TextUtils.sanitizeForHeader(headerValue);
+        var headerBytes = resultValue.getBytes(StandardCharsets.UTF_8);
 
-        var headerBytes = headerValue.getBytes(StandardCharsets.UTF_8);
-        if(headerBytes.length <= maxHeaderBytesSize) {
-            resultValue = headerValue;
-        }
-        else {
-            var compressedValue = GzipUtils.compressToBase64(headerBytes);
-            var compressedBytes = compressedValue.getBytes(StandardCharsets.UTF_8);
-            if(compressedBytes.length <= maxHeaderBytesSize) {
-                resultValue = compressedValue;
-                resultEncoding = HttpEncodings.GZIP_ENCODING;
-            }
-            else {
-                //Safely truncate the value to the specified Byte size...
-                var truncatedValue = TextUtils.truncateToFitUtf8ByteLength(headerValue, maxHeaderBytesSize);
-                //Safely overwrite the last set of characters with the Truncation Marker...
-                truncatedValue = truncatedValue
-                        .substring(0, truncatedValue.length() - TruncationMarker.length())
-                        .concat(TruncationMarker);
+        //Return the value if no truncation is needed...
+        if(headerBytes.length <= maxHeaderBytesSize)
+            return new SafeHeader(resultValue, resultEncoding);
 
-                resultValue = truncatedValue;
-            }
+        //If it's too long then attempt to compress the full value...
+        var compressedValue = GzipUtils.compressToBase64(headerBytes);
+        var compressedBytes = compressedValue.getBytes(StandardCharsets.UTF_8);
+        if(compressedBytes.length <= maxHeaderBytesSize) {
+            return new SafeHeader(compressedValue, HttpEncodings.GZIP_ENCODING);
         }
 
+        //Finally, as a fallback we safely truncate the value to the specified Byte size...
+        resultValue = appendMarkerToFitUtf8(resultValue, TRUNCATION_MARKER, maxHeaderBytesSize);
         return new SafeHeader(resultValue, resultEncoding);
+    }
+
+    private static String appendMarkerToFitUtf8(String base, String marker, int maxBytes) throws IOException {
+        byte[] markerBytes = marker.getBytes(StandardCharsets.UTF_8);
+        int bytesBudgetSize = Math.max(0, maxBytes - markerBytes.length);
+        String truncatedValue = TextUtils.truncateToFitUtf8ByteLength(base, bytesBudgetSize);
+
+        //If base is already <= bytesBudgetSize, we still want to signal truncation because we’re in that code path...
+        String truncatedValueWithMarker = truncatedValue + marker;
+
+        //Defensively ensure final <= maxBytes
+        while (truncatedValueWithMarker.getBytes(StandardCharsets.UTF_8).length > maxBytes && !truncatedValue.isEmpty()) {
+            truncatedValue = truncatedValue.substring(0, truncatedValue.length() - 1);
+            truncatedValueWithMarker = truncatedValue + marker;
+        }
+        return truncatedValueWithMarker;
     }
 }

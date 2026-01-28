@@ -1,6 +1,7 @@
 package com.cajuncoding.apachefop.serverless.utils;
 
 import com.cajuncoding.apachefop.serverless.config.ApacheFopServerlessConfig;
+import com.microsoft.azure.functions.HttpResponseMessage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;

@@ -19,7 +19,7 @@ public class ApacheFopServerlessFunctionExecutor {
     public ApacheFopServerlessFunctionExecutor() {
     }
 
-    public HttpResponseMessage ExecuteByteArrayRequest(
+    public HttpResponseMessage executeByteArrayRequest(
         HttpRequestMessage<Optional<byte[]>> request,
         Logger logger
     ) throws IOException, TransformerException, FOPException {
@@ -38,10 +38,10 @@ public class ApacheFopServerlessFunctionExecutor {
 
         //Now that we've initialized the unique elements for Byte[] processing we can
         //  execute the processing of the Render Request...
-        return ExecuteRequestWithRetry(xslFOBodyContent, config, responseBuilder, logger);
+        return executeRequestWithRetry(xslFOBodyContent, config, responseBuilder, logger);
     }
 
-    public HttpResponseMessage ExecuteStringRequest(
+    public HttpResponseMessage executeStringRequest(
         HttpRequestMessage<Optional<String>> request,
         Logger logger
     ) throws IOException, TransformerException, FOPException {
@@ -60,10 +60,10 @@ public class ApacheFopServerlessFunctionExecutor {
 
         //Now that we've initialized the unique elements for Byte[] processing we can
         //  execute the processing of the Render Request...
-        return ExecuteRequestWithRetry(xslFOBodyContent, config, responseBuilder, logger);
+        return executeRequestWithRetry(xslFOBodyContent, config, responseBuilder, logger);
     }
 
-    protected <TRequest> HttpResponseMessage ExecuteRequestWithRetry(
+    private <TRequest> HttpResponseMessage executeRequestWithRetry(
         String xslFOBodyContent,
         ApacheFopServerlessConfig config,
         ApacheFopServerlessResponseBuilder<TRequest> responseBuilder,
@@ -71,7 +71,7 @@ public class ApacheFopServerlessFunctionExecutor {
     ) throws TransformerException, IOException, FOPException {
         try {
 
-            return ExecuteRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
+            return executeRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
 
         }
         catch (FOPException fopExc) {
@@ -80,16 +80,16 @@ public class ApacheFopServerlessFunctionExecutor {
             if(looksLikePotentiallyRecoverableFopInitIssue(fopExc)) {
                 logger.info("[RETRY][ApacheFopServerlessFunctionExecutor] FOPException matched recoverable pattern; "
                             + "rebuilding FopFactory and retrying once. Exception: " + fopExc.getMessage());
-                var apacheFopRenderer = CreateApacheFopRenderer(config, logger);
+                var apacheFopRenderer = createApacheFopRenderer(config, logger);
                 apacheFopRenderer.rebuildFopFactorySingleton(); // your hook
-                return ExecuteRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
+                return executeRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
             }
 
             throw fopExc;
         }
     }
 
-    protected <TRequest> HttpResponseMessage ExecuteRequestInternal(
+    private <TRequest> HttpResponseMessage executeRequestInternal(
         String xslFOBodyContent,
         ApacheFopServerlessConfig config,
         ApacheFopServerlessResponseBuilder<TRequest> responseBuilder,
@@ -97,7 +97,7 @@ public class ApacheFopServerlessFunctionExecutor {
     ) throws TransformerException, IOException, FOPException {
         if (StringUtils.isBlank(xslFOBodyContent)) {
             logger.info(" - [BAD_REQUEST - 400] No XSL-FO body content was specified");
-            return responseBuilder.BuildBadXslFoBodyResponse();
+            return responseBuilder.buildBadXslFoBodyResponse();
         }
 
         logger.info(MessageFormat.format(" - XSL-FO Payload [Length={0}]", xslFOBodyContent.length()));
@@ -111,7 +111,7 @@ public class ApacheFopServerlessFunctionExecutor {
         }
 
         //Execute the transformation of the XSL-FO source content to Binary PDF format...
-        var apacheFopRenderer = CreateApacheFopRenderer(config, logger);
+        var apacheFopRenderer = createApacheFopRenderer(config, logger);
         var pdfRenderResult = apacheFopRenderer.renderPdfResult(xslFOBodyContent, config.isGzipResponseEnabled());
 
         //Add some contextual Logging so we can know if the PDF bytes were rendered...
@@ -119,11 +119,11 @@ public class ApacheFopServerlessFunctionExecutor {
 
         //Render the PDF Response (or EventLog Dump if specified)...
         return config.isEventLogDumpModeEnabled()
-                ? responseBuilder.BuildEventLogDumpResponse(pdfRenderResult, config)
-                : responseBuilder.BuildPdfResponse(pdfRenderResult, config);
+                ? responseBuilder.buildEventLogDumpResponse(pdfRenderResult, config)
+                : responseBuilder.buildPdfResponse(pdfRenderResult, config);
     }
 
-    private ApacheFopRenderer CreateApacheFopRenderer(ApacheFopServerlessConfig config, Logger optionalLogger)
+    private ApacheFopRenderer createApacheFopRenderer(ApacheFopServerlessConfig config, Logger optionalLogger)
     {
         //Initialize the ApacheFopRenderer (potentially optimized with less logging.
         //NOTE: If used, the Logger must be the instance injected into the Azure Function!

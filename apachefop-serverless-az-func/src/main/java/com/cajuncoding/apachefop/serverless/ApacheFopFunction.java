@@ -1,13 +1,11 @@
 package com.cajuncoding.apachefop.serverless;
 
-import com.cajuncoding.apachefop.serverless.http.HttpHeaders;
 import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessFunctionExecutor;
 import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessResponseBuilder;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
-import org.apache.fop.apps.MimeConstants;
 
 import java.util.Optional;
 
@@ -26,7 +24,7 @@ public class ApacheFopFunction {
     ) {
         try {
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();
-            return functionExecutor.ExecuteStringRequest(request, context.getLogger());
+            return functionExecutor.executeStringRequest(request, context.getLogger());
         }
         catch (Exception ex) {
             var responseBuilder = new ApacheFopServerlessResponseBuilder<String>(request);

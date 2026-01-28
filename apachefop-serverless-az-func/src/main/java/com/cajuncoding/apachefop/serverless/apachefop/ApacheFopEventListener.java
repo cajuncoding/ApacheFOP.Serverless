@@ -38,15 +38,15 @@ public class ApacheFopEventListener implements EventListener {
         return eventMsg;
     }
 
-    public String GetEventsText() {
-        return GetEventsText(e -> true, System.lineSeparator());
+    public String getEventsText() {
+        return getEventsText(e -> true, System.lineSeparator());
     }
 
-    public String GetEventsText(String lineSeparator) {
-        return GetEventsText(e -> true, lineSeparator);
+    public String getEventsText(String lineSeparator) {
+        return getEventsText(e -> true, lineSeparator);
     }
 
-    public String GetEventsText(Predicate<Event> eventFilter, String lineSeparator)
+    public String getEventsText(Predicate<Event> eventFilter, String lineSeparator)
     {
         var stringBuilder = new StringBuilder();
         for(var event : eventsList) {

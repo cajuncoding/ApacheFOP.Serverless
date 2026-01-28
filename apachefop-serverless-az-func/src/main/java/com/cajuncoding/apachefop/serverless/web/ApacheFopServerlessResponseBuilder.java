@@ -22,13 +22,13 @@ import java.util.Optional;
 public class ApacheFopServerlessResponseBuilder<TRequest> {
     public static final String TRUNCATION_MARKER = " . . . (TRUNCATED!)";
 
-    private HttpRequestMessage<Optional<TRequest>> request;
+    private final HttpRequestMessage<Optional<TRequest>> request;
 
     public ApacheFopServerlessResponseBuilder(HttpRequestMessage<Optional<TRequest>> azureFunctionRequest) {
         this.request = azureFunctionRequest;
     }
 
-    public HttpResponseMessage BuildBadXslFoBodyResponse() {
+    public HttpResponseMessage buildBadXslFoBodyResponse() {
         return request
                 .createResponseBuilder(HttpStatus.BAD_REQUEST)
                 .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.PLAIN_TEXT_UTF8)
@@ -46,7 +46,7 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 .body(errorMessageBody)
                 .build();
     }
-    public HttpResponseMessage BuildPdfResponse(
+    public HttpResponseMessage buildPdfResponse(
             ApacheFopRenderResult pdfRenderResult,
             ApacheFopServerlessConfig config
     ) throws IOException {
@@ -64,10 +64,11 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 ? HttpEncodings.GZIP_ENCODING
                 : HttpEncodings.IDENTITY_ENCODING;
 
-        var eventLogSafeHeaderValue = CreateSafeHeaderValue(eventLogText, config.getMaxHeaderBytesSize());
+        var eventLogSafeHeaderValue = createSafeHeaderValue(eventLogText, config.getMaxHeaderBytesSize());
 
         //Build the Http Response for the Client!
-        HttpResponseMessage response = request
+        //If GZIP is enabled then specify the proper encoding in the HttpResponse!
+        return request
                 .createResponseBuilder(HttpStatus.OK)
                 .body(fopPdfBytes)
                 .header(HttpHeaders.CONTENT_TYPE, MimeConstants.MIME_PDF)
@@ -77,11 +78,9 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 //If GZIP is enabled then specify the proper encoding in the HttpResponse!
                 .header(HttpHeaders.CONTENT_ENCODING, contentEncoding)
                 .build();
-
-        return response;
     }
 
-    public HttpResponseMessage BuildEventLogDumpResponse(
+    public HttpResponseMessage buildEventLogDumpResponse(
             ApacheFopRenderResult pdfRenderResult,
             ApacheFopServerlessConfig config
     ) {
@@ -89,16 +88,14 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
         String eventLogText = pdfRenderResult.getEventsLogAsBodyValue();
 
         //Build the Http Response for the Client!
-        HttpResponseMessage response = request
+        return request
                 .createResponseBuilder(HttpStatus.OK)
                 .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.PLAIN_TEXT_UTF8)
                 .body(eventLogText)
                 .build();
-
-        return response;
     }
 
-    public SafeHeader CreateSafeHeaderValue(String headerValue, int maxHeaderBytesSize) throws IOException {
+    public SafeHeader createSafeHeaderValue(String headerValue, int maxHeaderBytesSize) throws IOException {
         if(headerValue == null)
             return new SafeHeader(StringUtils.EMPTY, HttpEncodings.IDENTITY_ENCODING);
 

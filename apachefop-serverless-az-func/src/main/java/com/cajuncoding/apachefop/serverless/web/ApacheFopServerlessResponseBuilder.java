@@ -17,6 +17,8 @@ import org.apache.fop.apps.MimeConstants;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class ApacheFopServerlessResponseBuilder<TRequest> {
@@ -37,15 +39,38 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
     }
 
     public HttpResponseMessage buildExceptionResponse(Exception ex) {
-        var errorMessageBody = "Internal error: " + ex.getClass().getSimpleName() +
-                " - " + (ex.getMessage() == null ? "" : ex.getMessage());
+        String timestamp = OffsetDateTime.now()
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        String message = (ex.getMessage() == null || ex.getMessage().isBlank())
+                ? "<no message>"
+                : ex.getMessage();
+
+        final int maxFrames = 10;
+        StackTraceElement[] trace = ex.getStackTrace();
+        int statckTracelimit = Math.min(maxFrames, trace.length);
+
+        StringBuilder body = new StringBuilder(512)
+                .append("Timestamp: ").append(timestamp).append(StringUtils.LF)
+                .append("Exception: ").append(ex.getClass().getName()).append(StringUtils.LF)
+                .append("Message: ").append(message).append(StringUtils.LF)
+                .append("StackTrace (top ").append(statckTracelimit).append("):").append(StringUtils.LF);
+
+        for (int i = 0; i < statckTracelimit; i++) {
+            body.append("  at ").append(trace[i]).append(StringUtils.LF);
+        }
+
+        if (trace.length > statckTracelimit) {
+            body.append("  ... ").append(trace.length - statckTracelimit).append(" more").append(StringUtils.LF);
+        }
 
         return request
                 .createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
                 .header(HttpHeaders.CONTENT_TYPE, HttpContentTypes.PLAIN_TEXT_UTF8)
-                .body(errorMessageBody)
+                .body(body.toString())
                 .build();
     }
+
     public HttpResponseMessage buildPdfResponse(
             ApacheFopRenderResult pdfRenderResult,
             ApacheFopServerlessConfig config

@@ -80,8 +80,10 @@ public class ApacheFopServerlessFunctionExecutor {
             if(looksLikePotentiallyRecoverableFopInitIssue(fopExc)) {
                 logger.info("[RETRY][ApacheFopServerlessFunctionExecutor] FOPException matched recoverable pattern; "
                             + "rebuilding FopFactory and retrying once. Exception: " + fopExc.getMessage());
+
                 var apacheFopRenderer = createApacheFopRenderer(config, logger);
                 apacheFopRenderer.rebuildFopFactorySingleton(); // your hook
+
                 return executeRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
             }
 

@@ -8,6 +8,7 @@ import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -23,11 +24,13 @@ public class ApacheFopGzipFunction {
             final ExecutionContext context
     ) {
         var logger = context.getLogger();
+
         try {
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();
-            return functionExecutor.executeByteArrayRequest(request, context.getLogger());
+            return functionExecutor.executeByteArrayRequest(request, logger);
         }
         catch (Exception ex) {
+            logger.log(Level.SEVERE, "[ApacheFopGzipFunction] Request Failed due to Error: " + ex.getMessage(), ex);
             var responseBuilder = new ApacheFopServerlessResponseBuilder<byte[]>(request);
             return responseBuilder.buildExceptionResponse(ex);
         }

@@ -8,6 +8,7 @@ import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -22,11 +23,14 @@ public class ApacheFopFunction {
             HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context
     ) {
+        var logger = context.getLogger();
+
         try {
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();
-            return functionExecutor.executeStringRequest(request, context.getLogger());
+            return functionExecutor.executeStringRequest(request, logger);
         }
         catch (Exception ex) {
+            logger.log(Level.SEVERE, "[ApacheFopFunction] Request Failed due to Error: " + ex.getMessage(), ex);
             var responseBuilder = new ApacheFopServerlessResponseBuilder<String>(request);
             return responseBuilder.buildExceptionResponse(ex);
         }

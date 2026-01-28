@@ -29,7 +29,7 @@ public class ApacheFopServerlessFunctionExecutor {
         var config = new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
 
         //Create the Response Builder to handle the various responses we support.
-        var responseBuilder = new ApacheFopServerlessResponseBuilder<byte[]>(request);
+        var responseBuilder = new ApacheFopServerlessResponseBuilder<>(request);
 
         //Get the XslFO Source from the Request (handling GZip Payloads if specified)...
         var xslFOBodyContent = request.getBody().isPresent()
@@ -51,7 +51,7 @@ public class ApacheFopServerlessFunctionExecutor {
         var config = new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
 
         //Create the Response Builder to handle the various responses we support.
-        var responseBuilder = new ApacheFopServerlessResponseBuilder<String>(request);
+        var responseBuilder = new ApacheFopServerlessResponseBuilder<>(request);
 
         //Get the XslFO Source from the Request (handling GZip Payloads if specified)...
         var xslFOBodyContent = request.getBody().isPresent()
@@ -121,13 +121,13 @@ public class ApacheFopServerlessFunctionExecutor {
 
         //Render the PDF Response (or EventLog Dump if specified)...
         return config.isEventLogDumpModeEnabled()
-                ? responseBuilder.buildEventLogDumpResponse(pdfRenderResult, config)
+                ? responseBuilder.buildEventLogDumpResponse(pdfRenderResult)
                 : responseBuilder.buildPdfResponse(pdfRenderResult, config);
     }
 
     private ApacheFopRenderer createApacheFopRenderer(ApacheFopServerlessConfig config, Logger optionalLogger)
     {
-        //Initialize the ApacheFopRenderer (potentially optimized with less logging.
+        //Initialize the ApacheFopRenderer (potentially optimized with less logging).
         //NOTE: If used, the Logger must be the instance injected into the Azure Function!
         return config.isApacheFopLoggingEnabled()
                 ? new ApacheFopRenderer(config, optionalLogger)

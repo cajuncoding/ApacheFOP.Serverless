@@ -105,10 +105,7 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 .build();
     }
 
-    public HttpResponseMessage buildEventLogDumpResponse(
-            ApacheFopRenderResult pdfRenderResult,
-            ApacheFopServerlessConfig config
-    ) {
+    public HttpResponseMessage buildEventLogDumpResponse(ApacheFopRenderResult pdfRenderResult) {
         //Get the results of Apache FOP processing...
         String eventLogText = pdfRenderResult.getEventsLogAsBodyValue();
 

@@ -18,6 +18,19 @@ then I do love-me-some-coffee!*
 
 ## Updates / Change Log
 
+##### Updated the project to v1.7 with the following:
+- XXE Scripting Vulnerability Mitigation: Added secure processing features to XML parsing to mitigate XXE vulnerabilities as per OWASP recommendations.
+  - The rendering process is now using a fully streaming (SAX) pipeline that is secured (no XXE allowed) — NO DOM is built and NO identity transform hop is necessary anymore.
+- Fix Thread safety issues with FopFactory initialization with improved locking to create the singleton to mitigate risk of race conditions across multiple concurrent requests.
+- Implement support for dynamic re-initialization when potentially recoverable errors may occur and/or if FOP Factory corruption occurs (e.g. Font Cache corruption).
+- Updated all maven dependencies to latest stable versions.
+- Improve error handling for requests now identifying invalid/malformed XML requests as 400-BadRequest instead of Http 500-InternalServerError.
+- Improve error logging when exceptions occur.
+- Fix Error handling to safely handle and return exceptions as valid Json responses that are compliant with the ApacheFOP.Serverless C# client -- which looks for Json to extract the 'detailMessage' value.
+- Fix issues with Azure Functions internal pipeline throwing ClassCastExceptions where RpcHttpDataTarget cannot be cast to class TypedData$Builder; resolved by the aforementioned error handling changes.
+- Cleanup and fix non-critical items in the KeepWarm.fo source to minimize issues when rendering.
+- Fix <default-page-settings> configuration value to correctly initialize US-Letter size as default.
+
 ##### Updated the project to v1.6 with the following:
 - Updated Apache FOP to v2.11 (latest as of 2025-05-20).
 - Update to now use Java Azure Functions v4 (v3 is fully deprecated by end of 2022).

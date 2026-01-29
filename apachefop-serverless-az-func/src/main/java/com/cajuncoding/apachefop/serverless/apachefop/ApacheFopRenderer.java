@@ -148,7 +148,7 @@ public class ApacheFopRenderer {
             if (StringUtils.isNotBlank(configXmlText)) {
 
                 //When Debugging log the full Configuration file...
-                if (this.apacheFopConfig.isDebuggingEnabled()) {
+                if (this.apacheFopConfig.isXslFoDebuggingEnabled()) {
                     LogMessage("[DEBUG] ApacheFOP Configuration Xml:".concat(System.lineSeparator()).concat(configXmlText));
                 }
 

@@ -16,7 +16,8 @@ public class ApacheFopServerlessConfig {
 //    private String apacheFopServerlessContentType = StringUtils.EMPTY;
 
     //Azure Function Configuration Settings...
-    private boolean debuggingEnabled = false;
+    private boolean xslFoDebuggingEnabled = false;
+    private boolean isDetailedExceptionResponsesEnabled = false;
     private boolean apacheFopLoggingEnabled  = true;
     private boolean isGzipRequestSupported = true;
     private boolean eventLogDumpModeEnabled = false;
@@ -36,7 +37,11 @@ public class ApacheFopServerlessConfig {
     protected void readEnvironmentConfig() {
         //Enable Debugging by default which enables the Apache FOP Event Log to be returned via Response Header, etc.
         //NOTE: this can be disabled to save unnecessary logging, returning of Debug Headers, etc.
-        this.debuggingEnabled = getConfigAsBooleanOrDefault("DebuggingEnabled", true);
+        this.xslFoDebuggingEnabled = getConfigAsBooleanOrDefault("DebuggingEnabled", true);
+
+        //Disabled Detailed Exception Responses by default.
+        //NOTE: this can be enabled to allow detailed error information (e.g. StackTrace) to be returned in error Json responses.
+        this.isDetailedExceptionResponsesEnabled = getConfigAsBooleanOrDefault("DetailedExceptionResponsesEnabled", false);
 
         //Enable ApacheFop logging to AppInsights by default to ensure detailed logs; and AppInsights
         //  provides performance batching of logs to minimize impact.
@@ -93,13 +98,11 @@ public class ApacheFopServerlessConfig {
     //****************************************************************
     //Azure Function Configuration Settings...
     //****************************************************************
-    public boolean isApacheFopLoggingEnabled() {
-        return apacheFopLoggingEnabled;
-    }
+    public boolean isApacheFopLoggingEnabled() { return apacheFopLoggingEnabled; }
 
-    public boolean isDebuggingEnabled() {
-        return debuggingEnabled;
-    }
+    public boolean isXslFoDebuggingEnabled() { return xslFoDebuggingEnabled; }
+
+    public boolean isDetailedExceptionResponsesEnabled() { return isDetailedExceptionResponsesEnabled; }
 
     public boolean isGzipRequestSupported() { return isGzipRequestSupported; }
 

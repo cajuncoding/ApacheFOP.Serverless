@@ -20,7 +20,7 @@ public class XmlFactoryUtils {
 
     /// Initialize a DocumentBuilderFactory safely ensuring that it is XXE secured (if specified) to prevent
     ///     unexpected vulnerabilities which are an issue for Java as it is vulnerable by default.
-    /// This method implements all protections outlined in the OWASP XXE Cheat Sheet to ensure protection:
+    /// This method implements key protections outlined in the OWASP XXE Cheat Sheet to ensure protection:
     /// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#jaxp-documentbuilderfactory-saxparserfactory-and-dom4j
     public static DocumentBuilderFactory newDocumentBuilderFactory(boolean enableXxeSecurity)
     {
@@ -59,7 +59,7 @@ public class XmlFactoryUtils {
 
     /// Initialize a DocumentBuilderFactory safely ensuring that it is XXE secured (if specified) to prevent
     ///     unexpected vulnerabilities which are an issue for Java as it is vulnerable by default.
-    /// This method implements all protections outlined in the OWASP XXE Cheat Sheet to ensure protection:
+    /// This method implements key protections outlined in the OWASP XXE Cheat Sheet to ensure protection:
     /// https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html#jaxp-documentbuilderfactory-saxparserfactory-and-dom4j
     public static SAXParserFactory newSaxXmlParserFactory(boolean enableXxeSecurity)
     {

@@ -18,6 +18,10 @@ public class ApacheFopServerlessFunctionExecutor {
     public ApacheFopServerlessFunctionExecutor() {
     }
 
+    public static ApacheFopServerlessConfig createConfigFromRequest(HttpRequestMessage<?> request) {
+        return new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
+    }
+
     public HttpResponseMessage executeByteArrayRequest(
         HttpRequestMessage<Optional<byte[]>> request,
         Logger logger
@@ -25,7 +29,7 @@ public class ApacheFopServerlessFunctionExecutor {
         logger.info("ApacheFOP.Serverless HTTP trigger processing a raw GZip Byte[] request...");
 
         //Read the Configuration from AzureFunctions (request, environment variables)
-        var config = new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
+        var config = createConfigFromRequest(request);
 
         //Create the Response Builder to handle the various responses we support.
         var responseBuilder = new ApacheFopServerlessResponseBuilder<>(request);
@@ -47,7 +51,7 @@ public class ApacheFopServerlessFunctionExecutor {
         logger.info("ApacheFOP.Serverless HTTP trigger processing a String request...");
 
         //Read the Configuration from AzureFunctions (request, environment variables)
-        var config = new ApacheFopServerlessConfig(request.getHeaders(), request.getQueryParameters());
+        var config = createConfigFromRequest(request);
 
         //Create the Response Builder to handle the various responses we support.
         var responseBuilder = new ApacheFopServerlessResponseBuilder<>(request);
@@ -107,7 +111,7 @@ public class ApacheFopServerlessFunctionExecutor {
         logger.info(" - Executing Transformation with Apache FOP...");
 
         //Log the Full XSL-FO Payload from the Request if Debugging is enabled...
-        if(config.isDebuggingEnabled()) {
+        if(config.isXslFoDebuggingEnabled()) {
             logger.info("[DEBUG] XSL-FO Payload Received:".concat(System.lineSeparator()).concat(xslFOBodyContent));
         }
 

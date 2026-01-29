@@ -32,7 +32,8 @@ public class ApacheFopGzipFunction {
         catch (Exception ex) {
             logger.log(Level.SEVERE, "[ApacheFopGzipFunction] Request Failed due to Error: " + ex.getMessage(), ex);
             var responseBuilder = new ApacheFopServerlessResponseBuilder<byte[]>(request);
-            return responseBuilder.buildExceptionResponse(ex);
+            var config = ApacheFopServerlessFunctionExecutor.createConfigFromRequest(request);
+            return responseBuilder.buildExceptionResponse(ex, config.isDetailedExceptionResponsesEnabled());
         }
     }
 }

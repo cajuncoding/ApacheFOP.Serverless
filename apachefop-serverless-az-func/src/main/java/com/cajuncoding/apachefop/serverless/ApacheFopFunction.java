@@ -32,7 +32,8 @@ public class ApacheFopFunction {
         catch (Exception ex) {
             logger.log(Level.SEVERE, "[ApacheFopFunction] Request Failed due to Error: " + ex.getMessage(), ex);
             var responseBuilder = new ApacheFopServerlessResponseBuilder<String>(request);
-            return responseBuilder.buildExceptionResponse(ex);
+            var config = ApacheFopServerlessFunctionExecutor.createConfigFromRequest(request);
+            return responseBuilder.buildExceptionResponse(ex, config.isDetailedExceptionResponsesEnabled());
         }
     }
 }

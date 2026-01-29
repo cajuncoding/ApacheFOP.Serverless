@@ -39,7 +39,7 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 .build();
     }
 
-    public HttpResponseMessage buildExceptionResponse(Exception ex) {
+    public HttpResponseMessage buildExceptionResponse(Exception ex, boolean includeExceptionDetails) {
         String timestampUtc = Instant.now().toString();
 
         String exceptionType = ex.getClass().getSimpleName();
@@ -64,12 +64,14 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
         responseMap.put("httpStatus", httpStatus.name());
         responseMap.put("timestampUtc", timestampUtc);
         responseMap.put("exceptionType", exceptionType);
-        responseMap.put("className", className);
+        if(includeExceptionDetails) {
+            responseMap.put("className", className);
+        }
         responseMap.put("message", message);
         responseMap.put("detailMessage", detailMessage);
 
         //ONLY provide Stack Trace help if the error is an internal server error (unexpected exception)!
-        if(httpStatus == HttpStatus.INTERNAL_SERVER_ERROR) {
+        if(httpStatus == HttpStatus.INTERNAL_SERVER_ERROR && includeExceptionDetails) {
             final int maxFrames = 10;
             StackTraceElement[] trace = ex.getStackTrace();
             int stackTraceLimit = Math.min(maxFrames, trace.length);
@@ -102,9 +104,9 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
 
         //Get the results of Apache FOP processing...
         byte[] fopPdfBytes = pdfRenderResult.getPdfBytes();
-        String eventLogText = config.isDebuggingEnabled()
+        String eventLogText = config.isXslFoDebuggingEnabled()
                 ? pdfRenderResult.getEventsLogAsHeaderValue()
-                : "Disabled by AzureFunctions 'DebuggingEnabled' configuration Setting.";
+                : "Disabled by AzureFunctions 'DebuggingEnabled' configuration setting.";
 
         //Let's create a unique filename -- because that's helpful to the client...
         String fileName = TextUtils.getCurrentW3cDateTime().concat("_RenderedPdf.pdf");

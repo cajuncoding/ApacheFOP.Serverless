@@ -8,7 +8,8 @@
     "JAVA_HOME": "C:\\Program Files\\Zulu\\zulu-21\\",
     "KeepWarmCronSchedule": "0 */5 * * * *",
     "AccessibilityEnabled": "false",
-    "DebuggingEnabled": "false"
+    "DebuggingEnabled": "true",
+    "DetailedExceptionResponsesEnabled": "true"
   },
   "ConnectionStrings": {}
 }

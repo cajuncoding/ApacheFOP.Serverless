@@ -1,5 +1,7 @@
 package com.cajuncoding.apachefop.serverless.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -48,5 +50,12 @@ public class TextUtils {
         decoder.decode(byteBuffer, charBuffer, true);
         decoder.flush(charBuffer);
         return new String(charBuffer.array(), 0, charBuffer.position());
+    }
+
+    public static String sanitizeForHeader(String s) {
+        return s == null
+                ? StringUtils.EMPTY
+                : s.replace(StringUtils.CR, StringUtils.SPACE)
+                .replace(StringUtils.LF, StringUtils.SPACE);
     }
 }

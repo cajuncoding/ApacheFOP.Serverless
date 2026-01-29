@@ -4,6 +4,7 @@ import com.cajuncoding.apachefop.serverless.http.HttpEncodings;
 import com.cajuncoding.apachefop.serverless.http.HttpHeaders;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.Map;
 
@@ -15,7 +16,8 @@ public class ApacheFopServerlessConfig {
 //    private String apacheFopServerlessContentType = StringUtils.EMPTY;
 
     //Azure Function Configuration Settings...
-    private boolean debuggingEnabled = false;
+    private boolean xslFoDebuggingEnabled = false;
+    private boolean isDetailedExceptionResponsesEnabled = false;
     private boolean apacheFopLoggingEnabled  = true;
     private boolean isGzipRequestSupported = true;
     private boolean eventLogDumpModeEnabled = false;
@@ -35,7 +37,11 @@ public class ApacheFopServerlessConfig {
     protected void readEnvironmentConfig() {
         //Enable Debugging by default which enables the Apache FOP Event Log to be returned via Response Header, etc.
         //NOTE: this can be disabled to save unnecessary logging, returning of Debug Headers, etc.
-        this.debuggingEnabled = getConfigAsBooleanOrDefault("DebuggingEnabled", true);
+        this.xslFoDebuggingEnabled = getConfigAsBooleanOrDefault("DebuggingEnabled", true);
+
+        //Disabled Detailed Exception Responses by default.
+        //NOTE: this can be enabled to allow detailed error information (e.g. StackTrace) to be returned in error Json responses.
+        this.isDetailedExceptionResponsesEnabled = getConfigAsBooleanOrDefault("DetailedExceptionResponsesEnabled", false);
 
         //Enable ApacheFop logging to AppInsights by default to ensure detailed logs; and AppInsights
         //  provides performance batching of logs to minimize impact.
@@ -62,13 +68,13 @@ public class ApacheFopServerlessConfig {
         //Determine if the current request Content Encodings specified contain GZIP (as that's all that is currently supported).
         //NOTE: Headers are LowerCased in the returned Map!
         String contentEncodingHeader = headers.getOrDefault(HttpHeaders.CONTENT_ENCODING_LOWERCASE, null);
-        this.isGzipRequestEnabled = StringUtils.containsIgnoreCase(contentEncodingHeader, HttpEncodings.GZIP_ENCODING);
-        this.isBase64RequestEnabled = StringUtils.containsIgnoreCase(contentEncodingHeader, HttpEncodings.BASE64_ENCODING);
+        this.isGzipRequestEnabled = Strings.CI.contains(contentEncodingHeader, HttpEncodings.GZIP_ENCODING);
+        this.isBase64RequestEnabled = Strings.CI.contains(contentEncodingHeader, HttpEncodings.BASE64_ENCODING);
 
         //Determine if the Acceptable Encodings specified contain GZIP (as that's all that is currently supported).
         //NOTE: Headers are LowerCased in the returned Map!
         String acceptEncodingHeader = headers.getOrDefault(HttpHeaders.ACCEPT_ENCODING_LOWERCASE, null);
-        this.isGzipResponseEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
+        this.isGzipResponseEnabled = Strings.CI.contains(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
 
 //        //Get the Custom ContentType specified for reference
 //        this.apacheFopServerlessContentType = headers.getOrDefault(
@@ -92,13 +98,11 @@ public class ApacheFopServerlessConfig {
     //****************************************************************
     //Azure Function Configuration Settings...
     //****************************************************************
-    public boolean isApacheFopLoggingEnabled() {
-        return apacheFopLoggingEnabled;
-    }
+    public boolean isApacheFopLoggingEnabled() { return apacheFopLoggingEnabled; }
 
-    public boolean isDebuggingEnabled() {
-        return debuggingEnabled;
-    }
+    public boolean isXslFoDebuggingEnabled() { return xslFoDebuggingEnabled; }
+
+    public boolean isDetailedExceptionResponsesEnabled() { return isDetailedExceptionResponsesEnabled; }
 
     public boolean isGzipRequestSupported() { return isGzipRequestSupported; }
 

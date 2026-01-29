@@ -8,8 +8,8 @@ import org.apache.commons.text.StringEscapeUtils;
 import java.io.UnsupportedEncodingException;
 
 public class SafeHeader {
-    private String value;
-    private String encoding;
+    private final String value;
+    private final String encoding;
 
     public SafeHeader(String value, String encoding) throws UnsupportedEncodingException {
         this.value = sanitizeTextForHttpHeader(value, encoding);
@@ -29,7 +29,6 @@ public class SafeHeader {
         //BBernard - 09/29/2021
         //FIX bug where ApacheFOP may return Unicode Characters in Event Messages whereby we must escape any
         //  Unicode Characters in the Header Text because onlY ASCII characters are valid.
-        var sanitizedValue = StringEscapeUtils.escapeJava(value);
-        return sanitizedValue;
+        return StringEscapeUtils.escapeJava(value);
     }
 }

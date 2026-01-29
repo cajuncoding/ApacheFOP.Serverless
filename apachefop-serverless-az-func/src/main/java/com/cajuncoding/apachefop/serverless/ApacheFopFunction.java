@@ -1,12 +1,14 @@
 package com.cajuncoding.apachefop.serverless;
 
 import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessFunctionExecutor;
+import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessResponseBuilder;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -17,17 +19,21 @@ public class ApacheFopFunction {
      */
     @FunctionName("ApacheFOP")
     public HttpResponseMessage run(
-            @HttpTrigger(name = "req", route="apache-fop/xslfo", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION)
+            @HttpTrigger(name = "req", route="apache-fop/xslfo", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION, dataType = "string")
             HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context
     ) {
-        try {
+        var logger = context.getLogger();
 
+        try {
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();
-            return functionExecutor.ExecuteStringRequest(request, context.getLogger());
+            return functionExecutor.executeStringRequest(request, logger);
         }
         catch (Exception ex) {
-            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body(ex).build();
+            logger.log(Level.SEVERE, "[ApacheFopFunction] Request Failed due to Error: " + ex.getMessage(), ex);
+            var responseBuilder = new ApacheFopServerlessResponseBuilder<String>(request);
+            var config = ApacheFopServerlessFunctionExecutor.createConfigFromRequest(request);
+            return responseBuilder.buildExceptionResponse(ex, config.isDetailedExceptionResponsesEnabled());
         }
     }
 }

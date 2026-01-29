@@ -8,6 +8,8 @@
     "maven.view": "hierarchical",
     "cSpell.words": [
         "apachefop",
+        "fopconfparser",
+        "fopfactorybuilder",
         "Gzipped",
         "Keepin",
         "newing",

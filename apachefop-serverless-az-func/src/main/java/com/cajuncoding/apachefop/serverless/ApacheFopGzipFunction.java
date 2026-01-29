@@ -1,12 +1,14 @@
 package com.cajuncoding.apachefop.serverless;
 
 import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessFunctionExecutor;
+import com.cajuncoding.apachefop.serverless.web.ApacheFopServerlessResponseBuilder;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * Azure Functions with HTTP Trigger.
@@ -17,17 +19,21 @@ public class ApacheFopGzipFunction {
      */
     @FunctionName("ApacheFOPGzip")
     public HttpResponseMessage run(
-            @HttpTrigger(name = "req", route="apache-fop/gzip", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION)
+            @HttpTrigger(name = "req", route="apache-fop/gzip", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION, dataType = "binary")
             HttpRequestMessage<Optional<byte[]>> request,
             final ExecutionContext context
     ) {
-        try {
+        var logger = context.getLogger();
 
+        try {
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();
-            return functionExecutor.ExecuteByteArrayRequest(request, context.getLogger());
+            return functionExecutor.executeByteArrayRequest(request, logger);
         }
         catch (Exception ex) {
-            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR).body(ex).build();
+            logger.log(Level.SEVERE, "[ApacheFopGzipFunction] Request Failed due to Error: " + ex.getMessage(), ex);
+            var responseBuilder = new ApacheFopServerlessResponseBuilder<byte[]>(request);
+            var config = ApacheFopServerlessFunctionExecutor.createConfigFromRequest(request);
+            return responseBuilder.buildExceptionResponse(ex, config.isDetailedExceptionResponsesEnabled());
         }
     }
 }

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
@@ -31,7 +30,8 @@ public class XPathUtils {
     {
         Document xmlDocument = null;
         try {
-            xmlDocument = DocumentBuilderFactory.newInstance()
+            xmlDocument = XmlFactoryUtils
+                .newXxeSafeDocumentBuilderFactory()
                 .newDocumentBuilder()
                 .parse(xmlContentStream);
         } catch (SAXException | IOException | ParserConfigurationException e) {

@@ -1,5 +1,7 @@
 package com.cajuncoding.apachefop.serverless.apachefop;
 
+import com.cajuncoding.apachefop.serverless.utils.TextUtils;
+
 public class ApacheFopRenderResult {
     public static final String EventLogSeparator = "||";
 
@@ -22,14 +24,14 @@ public class ApacheFopRenderResult {
 
     public String getEventsLogAsBodyValue() {
         //Do NOT include line separators in teh Header value...
-        String headerValue = getEventListener().GetEventsText();
+        String headerValue = getEventListener().getEventsText();
         return headerValue;
     }
 
     public String getEventsLogAsHeaderValue() {
         //Do NOT include line separators in the Header value,
         //  instead we separate with a valid ASCII Delimiter...
-        String headerValue = getEventListener().GetEventsText(EventLogSeparator);
-        return headerValue;
+        String eventLogText = getEventListener().getEventsText(EventLogSeparator);
+        return TextUtils.sanitizeForHeader(eventLogText);
     }
 }

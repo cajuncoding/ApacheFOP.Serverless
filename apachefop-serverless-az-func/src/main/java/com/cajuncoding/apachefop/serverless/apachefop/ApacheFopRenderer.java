@@ -37,7 +37,7 @@ public class ApacheFopRenderer {
     //  more than one thread (e.g. configuration changes on the Factory class).
     // Explicitly Opt-in to Safe processing by enabling secure processing & Block external DTDs & stylesheets!
     // NOTE: Even though XXE vulnerabilities were patched inside some of the FOP internal handling after FOP v2.10
-    //      this was still an issue for Java in general which is vulnerable by default and therefor our XML parsing
+    //      this was still an issue for Java in general which is vulnerable by default and therefore our XML parsing
     //      must be explicitly set to securely process the XML itself -- it is NOT safe from XXE by default (ugg)!
     private static final SAXParserFactory saxXmlParserFactory = XmlFactoryUtils.newXxeSafeSaxXmlParserFactory();
 
@@ -129,7 +129,7 @@ public class ApacheFopRenderer {
     }
 
     //Provide mechanism to force rebuilding of the FopFactory for edge cases where something gets corrupted
-    //  (e.g. Font Cache may have random potential/occasional corruption issus, etc.).
+    //  (e.g. Font Cache may have random potential/occasional corruption issues, etc.).
     public void rebuildFopFactorySingleton() {
         synchronized (FOP_INITIALIZATION_LOCK) {
             staticFopFactory = buildFopFactoryWithConfigAndLoggingUnsafe();

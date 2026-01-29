@@ -43,7 +43,7 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
         String timestampUtc = Instant.now().toString();
 
         String exceptionType = ex.getClass().getSimpleName();
-        if(exceptionType.isBlank())
+        if(StringUtils.isBlank(exceptionType))
             exceptionType = "UnknownException";
 
         String className = ex.getClass().getName();

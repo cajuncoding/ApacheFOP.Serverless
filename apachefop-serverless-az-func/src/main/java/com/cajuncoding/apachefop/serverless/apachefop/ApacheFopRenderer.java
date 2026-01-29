@@ -91,7 +91,7 @@ public class ApacheFopRenderer {
             //Treat ParserConfigurationException as internal misconfiguration and convert to an unchecked exception.
             catch (ParserConfigurationException e) {
                 logUnexpectedException(e);
-                throw new RuntimeException(e);
+                throw XmlFactoryUtils.newXmlParserInitException(e);
             }
             catch (SAXParseException e) {
                 throw XmlFactoryUtils.newBadXmlRequestException(e);

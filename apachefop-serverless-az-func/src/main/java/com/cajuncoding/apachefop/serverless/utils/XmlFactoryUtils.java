@@ -49,7 +49,7 @@ public class XmlFactoryUtils {
         }
         //Treat ParserConfigurationException as internal misconfiguration and convert to an unchecked exception.
         catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
+            throw XmlFactoryUtils.newXmlParserInitException(e);
         }
     }
 
@@ -91,7 +91,7 @@ public class XmlFactoryUtils {
         }
         //Treat ParserConfigurationException as internal misconfiguration and convert to an unchecked exception.
         catch (ParserConfigurationException | SAXNotRecognizedException | SAXNotSupportedException e) {
-            throw new RuntimeException(e);
+            throw XmlFactoryUtils.newXmlParserInitException(e);
         }
     }
 
@@ -102,7 +102,7 @@ public class XmlFactoryUtils {
                     "Invalid XSL-FO at line [{0}], column [{1}]{2}",
                     saxParseException.getLineNumber(),
                     saxParseException.getColumnNumber(),
-                    (saxParseException.getMessage() != null ? ": " + saxParseException.getMessage() : StringUtils.EMPTY)
+                    buildAppendedErrorMessage(saxParseException)
                 ),
                 saxParseException
         );
@@ -113,11 +113,29 @@ public class XmlFactoryUtils {
         return new IllegalArgumentException(
                 MessageFormat.format(
                         "Invalid XSL-FO{0}",
-                        (saxException.getMessage() != null ? ": " + saxException.getMessage() : ".")
+                        buildAppendedErrorMessage(saxException)
                 ),
                 saxException
         );
     }
 
+    public static IllegalStateException newXmlParserInitException(Exception xmlParserConfigException) {
+        // Add useful context (line/column) for callers/logs; rethrow as IllegalArgumentException
+        return new IllegalStateException(
+                MessageFormat.format(
+                        "Invalid XSL-FO State - Failed to initialize Apache FOP SAX XML Parser{0}",
+                        buildAppendedErrorMessage(xmlParserConfigException)
+                ),
+                xmlParserConfigException
+        );
+    }
+
+    private static String buildAppendedErrorMessage(Exception ex)
+    {
+        String errorMessage = ex != null ? ex.getMessage() : StringUtils.EMPTY;
+        return !StringUtils.isBlank(errorMessage)
+                ? ": " + errorMessage
+                : ".";
+    }
 }
 

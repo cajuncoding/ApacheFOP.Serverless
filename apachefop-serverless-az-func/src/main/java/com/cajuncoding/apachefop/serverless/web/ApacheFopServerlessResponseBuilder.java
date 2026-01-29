@@ -175,7 +175,7 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
         return new SafeHeader(resultValue, resultEncoding);
     }
 
-    private static String appendMarkerToFitUtf8(String base, String marker, int maxBytes) throws IOException {
+    private static String appendMarkerToFitUtf8(String base, String marker, int maxBytes) {
         byte[] markerBytes = marker.getBytes(StandardCharsets.UTF_8);
 
         // If the marker alone exceeds the byte budget, truncate the marker itself to fit.

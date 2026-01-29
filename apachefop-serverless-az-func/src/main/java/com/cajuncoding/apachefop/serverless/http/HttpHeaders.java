@@ -1,6 +1,10 @@
 package com.cajuncoding.apachefop.serverless.http;
 
-public class HttpHeaders {
+public final class HttpHeaders {
+
+    //Prevent instantiation...
+    private HttpHeaders() { throw new AssertionError("Class should not be instantiated!"); }
+
     public static final String ACCEPT_ENCODING = "Accept-Encoding";
     public static final String ACCEPT_ENCODING_LOWERCASE = ACCEPT_ENCODING.toLowerCase();
 

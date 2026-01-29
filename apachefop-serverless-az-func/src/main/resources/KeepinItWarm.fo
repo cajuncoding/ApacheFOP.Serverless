@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- BBernard: XSL-FO as well formed XML must always have a Root Element with FO Namespace defined -->
-<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format">
+<fo:root xmlns:fo="http://www.w3.org/1999/XSL/Format" xml:lang="en-US">
 
     <fo:layout-master-set>
         <!--Define PORTRAIT PAGE settings -->

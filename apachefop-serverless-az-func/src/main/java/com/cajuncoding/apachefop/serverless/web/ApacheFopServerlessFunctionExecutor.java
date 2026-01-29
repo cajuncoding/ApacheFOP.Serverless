@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.fop.apps.FOPException;
 
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Optional;
@@ -22,7 +21,7 @@ public class ApacheFopServerlessFunctionExecutor {
     public HttpResponseMessage executeByteArrayRequest(
         HttpRequestMessage<Optional<byte[]>> request,
         Logger logger
-    ) throws IOException, TransformerException, FOPException {
+    ) throws IOException, FOPException {
         logger.info("ApacheFOP.Serverless HTTP trigger processing a raw GZip Byte[] request...");
 
         //Read the Configuration from AzureFunctions (request, environment variables)
@@ -44,7 +43,7 @@ public class ApacheFopServerlessFunctionExecutor {
     public HttpResponseMessage executeStringRequest(
         HttpRequestMessage<Optional<String>> request,
         Logger logger
-    ) throws IOException, TransformerException, FOPException {
+    ) throws IOException, FOPException {
         logger.info("ApacheFOP.Serverless HTTP trigger processing a String request...");
 
         //Read the Configuration from AzureFunctions (request, environment variables)
@@ -68,7 +67,7 @@ public class ApacheFopServerlessFunctionExecutor {
         ApacheFopServerlessConfig config,
         ApacheFopServerlessResponseBuilder<TRequest> responseBuilder,
         Logger logger
-    ) throws TransformerException, IOException, FOPException {
+    ) throws IOException, FOPException {
         try {
 
             return executeRequestInternal(xslFOBodyContent, config, responseBuilder, logger);
@@ -96,7 +95,7 @@ public class ApacheFopServerlessFunctionExecutor {
         ApacheFopServerlessConfig config,
         ApacheFopServerlessResponseBuilder<TRequest> responseBuilder,
         Logger logger
-    ) throws TransformerException, IOException, FOPException {
+    ) throws IOException, FOPException {
         if (StringUtils.isBlank(xslFOBodyContent)) {
             logger.info(" - [BAD_REQUEST - 400] No XSL-FO body content was specified");
             return responseBuilder.buildBadXslFoBodyResponse();

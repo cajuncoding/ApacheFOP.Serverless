@@ -18,7 +18,7 @@
     <!-- Source resolution in dpi (dots/pixels per inch) for determining the size of pixels in SVG and bitmap images, default: 72dpi -->
     <target-resolution>72</target-resolution>
     <!-- default page-height and page-width, in case either height or width value is specified as auto -->
-    <default-page-settings height="11in" width="8.5in" />
+    <default-page-settings page-width="8.5in" page-height="11in"/>
 
     <!-- All fonts information that has been gathered as a result of "directory" or "auto-detect" font configurations will be cached for future rendering runs.-->
     <use-cache>true</use-cache>
@@ -40,7 +40,7 @@
             <fonts>
                 <!-- Automatically detect operating system installed fonts; More Details Here: https://xmlgraphics.apache.org/fop/2.6/fonts.html
                      NOTE: On Windows there are a lot of fonts available so the VERY FIRST startup time will be impacted significantly
-                            (seconds, or even a couple minutes) until a local cache file is built.  However, once the cache file is built,
+                            (seconds, or even a couple of minutes) until a local cache file is built.  However, once the cache file is built,
                             for a server/Azure Function instance, then the execution times will be normal.
                      NOTE: In Serverless environments this can be exasperated though because each new Serverless instance
                             spun up will not have a cache file by default!

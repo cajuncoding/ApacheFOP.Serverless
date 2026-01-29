@@ -4,6 +4,7 @@ import com.cajuncoding.apachefop.serverless.http.HttpEncodings;
 import com.cajuncoding.apachefop.serverless.http.HttpHeaders;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import java.util.Map;
 
@@ -62,13 +63,13 @@ public class ApacheFopServerlessConfig {
         //Determine if the current request Content Encodings specified contain GZIP (as that's all that is currently supported).
         //NOTE: Headers are LowerCased in the returned Map!
         String contentEncodingHeader = headers.getOrDefault(HttpHeaders.CONTENT_ENCODING_LOWERCASE, null);
-        this.isGzipRequestEnabled = StringUtils.containsIgnoreCase(contentEncodingHeader, HttpEncodings.GZIP_ENCODING);
-        this.isBase64RequestEnabled = StringUtils.containsIgnoreCase(contentEncodingHeader, HttpEncodings.BASE64_ENCODING);
+        this.isGzipRequestEnabled = Strings.CI.contains(contentEncodingHeader, HttpEncodings.GZIP_ENCODING);
+        this.isBase64RequestEnabled = Strings.CI.contains(contentEncodingHeader, HttpEncodings.BASE64_ENCODING);
 
         //Determine if the Acceptable Encodings specified contain GZIP (as that's all that is currently supported).
         //NOTE: Headers are LowerCased in the returned Map!
         String acceptEncodingHeader = headers.getOrDefault(HttpHeaders.ACCEPT_ENCODING_LOWERCASE, null);
-        this.isGzipResponseEnabled = StringUtils.containsIgnoreCase(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
+        this.isGzipResponseEnabled = Strings.CI.contains(acceptEncodingHeader, HttpEncodings.GZIP_ENCODING);
 
 //        //Get the Custom ContentType specified for reference
 //        this.apacheFopServerlessContentType = headers.getOrDefault(

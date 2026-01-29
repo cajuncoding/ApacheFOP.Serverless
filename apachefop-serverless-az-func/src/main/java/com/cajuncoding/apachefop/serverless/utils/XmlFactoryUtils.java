@@ -75,7 +75,7 @@ public class XmlFactoryUtils {
                 // Disallow DOCTYPE declarations entirely
                 saxParserFactory.setFeature(XmlSecurityFeatures.DISALLOW_DOCTYPE_DECLARATIONS, true);
                 // Enable secure processing (defense-in-depth)
-                saxParserFactory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                saxParserFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
                 // Block external entities - these features MUST be used together to ensure XXE protection!
                 saxParserFactory.setFeature(XmlSecurityFeatures.EXTERNAL_GENERAL_ENTITIES, false);
                 saxParserFactory.setFeature(XmlSecurityFeatures.EXTERNAL_PARAMETER_ENTITIES, false);

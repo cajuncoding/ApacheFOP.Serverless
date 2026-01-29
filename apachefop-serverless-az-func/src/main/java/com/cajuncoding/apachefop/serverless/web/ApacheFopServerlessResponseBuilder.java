@@ -171,17 +171,16 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
 
     private static String appendMarkerToFitUtf8(String base, String marker, int maxBytes) throws IOException {
         byte[] markerBytes = marker.getBytes(StandardCharsets.UTF_8);
-        int bytesBudgetSize = Math.max(0, maxBytes - markerBytes.length);
+
+        // If the marker alone exceeds the byte budget, truncate the marker itself to fit.
+        if (markerBytes.length > maxBytes) {
+            return TextUtils.truncateToFitUtf8ByteLength(marker, maxBytes);
+        }
+
+        int bytesBudgetSize = maxBytes - markerBytes.length;
         String truncatedValue = TextUtils.truncateToFitUtf8ByteLength(base, bytesBudgetSize);
 
-        //If base is already <= bytesBudgetSize, we still want to signal truncation because we’re in that code path...
-        String truncatedValueWithMarker = truncatedValue + marker;
-
-        //Defensively ensure final <= maxBytes
-        while (truncatedValueWithMarker.getBytes(StandardCharsets.UTF_8).length > maxBytes && !truncatedValue.isEmpty()) {
-            truncatedValue = truncatedValue.substring(0, truncatedValue.length() - 1);
-            truncatedValueWithMarker = truncatedValue + marker;
-        }
-        return truncatedValueWithMarker;
+        // Base has been truncated (if necessary) to leave room for the marker; now append the marker.
+        return truncatedValue + marker;
     }
 }

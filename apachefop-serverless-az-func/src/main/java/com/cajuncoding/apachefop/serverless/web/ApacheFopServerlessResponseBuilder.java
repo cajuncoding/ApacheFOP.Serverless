@@ -40,6 +40,11 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
     }
 
     public HttpResponseMessage buildExceptionResponse(Exception ex, boolean includeExceptionDetails) {
+        
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        if(ex instanceof IllegalArgumentException)
+            httpStatus = HttpStatus.BAD_REQUEST;
+
         String timestampUtc = Instant.now().toString();
 
         String exceptionType = ex.getClass().getSimpleName();
@@ -48,17 +53,18 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
 
         String className = ex.getClass().getName();
 
-        String message = (ex.getMessage() == null || ex.getMessage().isBlank())
-                ? StringUtils.EMPTY
-                : ex.getMessage();
+        String message = "An unexpected error occurred while processing the request.";
+        String detailMessage = "An unexpected internal server error occurred during processing. Details are not provided for security reasons.";
+        //ONLY provide Message details this is identified as a BadRequest in which case the caller should know details about why the 
+        //  XML was bad (e.g. Parsing or FOP processing exception)...
+        if(includeExceptionDetails || httpStatus == HttpStatus.BAD_REQUEST)
+        {
+            message = (ex.getMessage() == null || ex.getMessage().isBlank())
+                    ? StringUtils.EMPTY
+                    : ex.getMessage();
 
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        if(ex instanceof IllegalArgumentException)
-            httpStatus = HttpStatus.BAD_REQUEST;
-
-        String detailMessage = includeExceptionDetails || httpStatus == HttpStatus.BAD_REQUEST
-                ? MessageFormat.format("[{0}] {1}", exceptionType, message)
-                : "An unexpected internal server error occurred during processing. Details are not provided for security reasons.";
+            detailMessage = MessageFormat.format("[{0}] {1}", exceptionType, message);
+        }
 
         //NOTE: WE use LinkedHashMap to preserve the ordering of the properties in the serialized Json output...
         Map<String, Object> responseMap = new LinkedHashMap<>();
@@ -73,7 +79,7 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
         responseMap.put("detailMessage", detailMessage);
 
         //ONLY provide Stack Trace help if the error is an internal server error (unexpected exception)!
-        if(httpStatus == HttpStatus.INTERNAL_SERVER_ERROR && includeExceptionDetails) {
+        if(includeExceptionDetails && httpStatus == HttpStatus.INTERNAL_SERVER_ERROR) {
             final int maxFrames = 10;
             StackTraceElement[] trace = ex.getStackTrace();
             int stackTraceLimit = Math.min(maxFrames, trace.length);

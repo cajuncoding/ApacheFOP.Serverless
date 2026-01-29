@@ -52,11 +52,13 @@ public class ApacheFopServerlessResponseBuilder<TRequest> {
                 ? StringUtils.EMPTY
                 : ex.getMessage();
 
-        String detailMessage = MessageFormat.format("[{0}] {1}", exceptionType, message);
-
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         if(ex instanceof IllegalArgumentException)
             httpStatus = HttpStatus.BAD_REQUEST;
+
+        String detailMessage = includeExceptionDetails || httpStatus == HttpStatus.BAD_REQUEST
+                ? MessageFormat.format("[{0}] {1}", exceptionType, message)
+                : "An unexpected internal server error occurred during processing. Details are not provided for security reasons.";
 
         //NOTE: WE use LinkedHashMap to preserve the ordering of the properties in the serialized Json output...
         Map<String, Object> responseMap = new LinkedHashMap<>();

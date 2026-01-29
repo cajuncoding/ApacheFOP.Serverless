@@ -78,7 +78,7 @@ public class ApacheFopJavaResourcesFileResolver implements ResourceResolver {
                 try {
                     //Now with the relative path for our resource we can attempt to retrieve it...
                     //NOTE: IOUtils.toByteArray() does not automatically close the stream so we must safely handle that!
-                    try (var resultStream = ResourceUtils.loadResourceAsStream(mappedPathCacheKey)) {
+                    try (var resultStream = ResourceUtils.loadResourceAsStream(key)) {
                         return resultStream != null
                                 ? Optional.of(IOUtils.toByteArray(resultStream))
                                 : Optional.empty();

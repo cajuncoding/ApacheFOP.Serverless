@@ -224,7 +224,7 @@ Ensure that the configuration values are set correctly for your Azure Function..
 
 Configuration Values:
 - `FUNCTIONS_WORKER_RUNTIME` = `java`
-- `FUNCTIONS_EXTENSION_VERSION` = `~3`
+- `FUNCTIONS_EXTENSION_VERSION` = `~4`
 - `FUNCTIONS_CORE_TOOLS_DISPLAY_LOGO` = `true` (pretty sure this is optional, but I like having it)
 - `JAVA_HOME` = `C:\Program Files\Zulu\zulu-11\` _(may be optional, but at one point this was the only way I got it to find the right version before uninstalling everything else)_
 - `AzureWebJobsStorage` = `UseDevelopmentStorage=true` OR `Initialize a new Azure Function in the Portal to get a valid Web Jobs storage key` 
@@ -232,7 +232,8 @@ Configuration Values:
   - [Here are the instructions for installing/running the Storage Emulator (Windows) or Azurite Emulator (Linux)](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator#get-the-storage-emulator) to run completely locally.
   - OR you may create your Azure function and configure your real connection string here.
 - `KeepWarmCronSchedule` = `0 */5 * * * *` _(also required configuration for the KeepWarmFunction)_
-- `DebuggingEnabled` = `true` (Optional but very helpful once you start using it to return debug details in the responses).
+- `DebuggingEnabled` = `true` (Optional but very helpful once you start using for debugging your XSL-FO templates; it returns debug details in the responses & logs).
+- `DetailedExceptionResponsesEnabled` = `true` (Optional but hepful if the application fails unexpectedly due to various internal server issues (Xml Parser/FOP Factory/etc.)).
 
 ## Calling the Service from .NET
 

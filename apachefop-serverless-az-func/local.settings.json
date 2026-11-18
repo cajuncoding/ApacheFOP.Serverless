@@ -4,6 +4,10 @@
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "java",
     "FUNCTIONS_EXTENSION_VERSION": "~4",
+    //Implement Mitigation for BASE64 Intrinsics issue CVE-2023-21839!
+    //NOTE: When deploying to Azure the App Setting to use is likely `languageWorkers__java__arguments`,
+    //      as `JAVA_TOOL_OPTIONS` is the setting needed when running Locally!
+    "JAVA_TOOL_OPTIONS": "-XX:-UseBASE64Intrinsics",
     "FUNCTIONS_CORE_TOOLS_DISPLAY_LOGO": "true",
     "JAVA_HOME": "C:\\Program Files\\Zulu\\zulu-21\\",
     "KeepWarmCronSchedule": "0 */5 * * * *",

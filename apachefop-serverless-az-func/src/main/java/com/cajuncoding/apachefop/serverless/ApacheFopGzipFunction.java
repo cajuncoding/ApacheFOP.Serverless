@@ -7,6 +7,8 @@ import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.HttpTrigger;
 
+import logging.WorkerStartupDiagnostics;
+
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -19,11 +21,12 @@ public class ApacheFopGzipFunction {
      */
     @FunctionName("ApacheFOPGzip")
     public HttpResponseMessage run(
-            @HttpTrigger(name = "req", route="apache-fop/gzip", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION, dataType = "binary")
-            HttpRequestMessage<Optional<byte[]>> request,
-            final ExecutionContext context
+        @HttpTrigger(name = "req", route="apache-fop/gzip", methods = {HttpMethod.POST}, authLevel = AuthorizationLevel.FUNCTION, dataType = "binary")
+        HttpRequestMessage<Optional<byte[]>> request,
+        final ExecutionContext context
     ) {
         var logger = context.getLogger();
+        WorkerStartupDiagnostics.report(logger);
 
         try {
             var functionExecutor = new ApacheFopServerlessFunctionExecutor();

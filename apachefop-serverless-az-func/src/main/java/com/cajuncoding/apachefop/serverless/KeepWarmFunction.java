@@ -8,6 +8,9 @@ import com.cajuncoding.apachefop.serverless.utils.TextUtils;
 import com.microsoft.azure.functions.*;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.TimerTrigger;
+
+import logging.WorkerStartupDiagnostics;
+
 import org.apache.fop.apps.FOPException;
 
 import java.io.IOException;
@@ -23,12 +26,13 @@ public class KeepWarmFunction {
      */
     @FunctionName("KeepWarm")
     public void run(
-            //Run Every 5 Minutes...
-            @TimerTrigger(name = "KeepWarmTrigger", schedule = "%KeepWarmCronSchedule%") String timerInfo,
-            final ExecutionContext context
+        //Run Every 5 Minutes...
+        @TimerTrigger(name = "KeepWarmTrigger", schedule = "%KeepWarmCronSchedule%") String timerInfo,
+        final ExecutionContext context
     ) throws IOException, FOPException {
 
         var logger =  context.getLogger();
+        WorkerStartupDiagnostics.report(logger);
         logger.info("ApacheFOP.Serverless Keep Warm Timer Trigger: ".concat(timerInfo));
 
         logger.info(MessageFormat.format(" - Executing at [{0}]", TextUtils.getCurrentW3cDateTime()));

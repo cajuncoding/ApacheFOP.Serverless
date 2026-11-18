@@ -42,7 +42,7 @@ then I do love-me-some-coffee!*
   - The custom resolver is lost when calling `FopFactoryBuilder.setConfiguration()`, whereby the code now instantiates a default resource resover that is actually passed to the `FontManager` instead of the resource resolver we provided in the constructor.
   - This worked fine in Fop v2.6 (and maybe other versions).
   - The resolution is to initialize `FopFactoryBuilder` differently now by parsing the configuration directly from the `Stream` using `FopConfParser` which allows us to provide the `ApacheFopJavaResourcesFileResolver` into it's constructor instead (that is then correctly honored).
-    - We are then able to call `FopConfParsergetFopFactoryBuilder()` to get the fully initialize `FopFactoryBuilder` from the `FopConfParser`.
+    - We are then able to call `FopConfParser.GetFopFactoryBuilder()` to get the fully initialize `FopFactoryBuilder` from the `FopConfParser`.
     - Everything works as expected after that!
 
 ##### Updated the project to v1.5 with the following:
@@ -234,6 +234,15 @@ Configuration Values:
 - `KeepWarmCronSchedule` = `0 */5 * * * *` _(also required configuration for the KeepWarmFunction)_
 - `DebuggingEnabled` = `true` (Optional but very helpful once you start using for debugging your XSL-FO templates; it returns debug details in the responses & logs).
 - `DetailedExceptionResponsesEnabled` = `true` (Optional but hepful if the application fails unexpectedly due to various internal server issues (Xml Parser/FOP Factory/etc.)).
+
+### JVM Vulnerabilities and Mitigation Checks
+
+The first HTTP or keep-warm trigger per Java worker runs the startup diagnostics. With `APPLICATIONINSIGHTS_CONNECTION_STRING` configured, the worker sends the results directly to Application Insights as traces with native custom dimensions: `CveVulnerability`, `VulnerabilityNickname`, and `VulnerabilityStatus`. In Application Insights **Transaction search**, select **Trace**, search for the CVE ID, and open the result to see its **Custom Properties**. No message parsing is required. This does not change the Functions host's telemetry mode or other application logs. If the connection string is absent, the diagnostics use the Functions logger with plain-text messages and no custom dimensions.
+
+#### Java4Shell (CVE-2026-114938)
+On an affected JVM that supports this workaround, add `-XX:-UseBASE64Intrinsics` to the Java worker's startup arguments. For Azure Functions, use the app setting documented for your hosting plan in [Microsoft's Java Functions guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-java#customize-jvm). Preserve existing JVM arguments and remove any conflicting `-XX:+UseBASE64Intrinsics`. Saving the app setting restarts the Function App but does not require a code deployment.
+
+The diagnostic reports the effective `UseBASE64Intrinsics` value as `MitigationActive` (disabled), `MitigationNotActive` (enabled), or `Unknown` (unavailable). This checks the JVM setting only. Consult your JDK vendor's advisory for affected versions and use a build that the vendor confirms is patched for [CVE-2026-114938](https://www.cve.org/CVERecord?id=CVE-2026-114938).
 
 ## Calling the Service from .NET
 
